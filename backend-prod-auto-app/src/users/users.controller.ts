@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { Prisma } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 @Controller('users')
 export class UsersController {
@@ -16,12 +17,13 @@ export class UsersController {
 
   @Post()
   create(@Body() createUserDto: Prisma.UsersCreateInput) {
+     createUserDto.password = bcrypt.hashSync(createUserDto.password, 10); 
     return this.usersService.create(createUserDto);
   }
 
   @Get()
   findAll() {
-    return this.usersService.findAll();
+    return this.usersService.findAll(); 
   }
 
   @Get(':id')
