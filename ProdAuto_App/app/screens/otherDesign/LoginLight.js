@@ -6,8 +6,7 @@ import { Input } from '@rneui/themed'
 import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
-
-
+import Home from "./Home";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from '@env'
 
@@ -33,7 +32,7 @@ export default function Login() {
             errors.password = "Password needs to be 6 characters or more";
         }
 
-        setErrors(errors); 
+        setErrors(errors); // Set the errors state
 
         if (Object.keys(errors).length === 0) {
           setLoading(true);
@@ -43,17 +42,15 @@ export default function Login() {
                 .then((res) => {
                     if (res.status == 201) {
                         Alert.alert('Logged In Successfully !');
-                        
+                        navigation.navigate(Home);
                         AsyncStorage.setItem('token', res.data.token)
-                        AsyncStorage.setItem('IsLoggedIn',JSON.stringify(true))
-                        navigation.navigate("AdminScreen");
                     }
                 })
                 .catch((error) => {
                   setLoading(false);
                   console.log('Error config:', error.config);
                   if (error.response) {
-                    
+                    // The server responded with a status code out of the range of 2xx
                     console.log('Error response data:', error.response.data);
                     console.log('Error response status:', error.response.status);
                     console.log('Error response headers:', error.response.headers);
@@ -74,64 +71,65 @@ export default function Login() {
 
 
     return (
-      <ScrollView contentContainerStyle={tw`flex-grow bg-white`} keyboardShouldPersistTaps="always">
-          <SafeAreaView style={tw`flex-1 justify-center items-center`}>
-              <View style={tw`w-full px-8`}>
-              <View  style={tw`flex items-center bg-white`}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="always">
+          <View style={tw`flex-1  bg-white`}>
+              <SafeAreaView style={tw`flex-1`}>
+              <Image source={require("../../assets/cloudBig.png")}
+  style={tw`absolute bottom-0`}> 
+
+</Image>
+<View  style={tw`flex items-center bg-white`}>
 <Image source={require("../../assets/innoTechLogo.png")}
-    > 
-  
+  style={tw`mt-[5.5rem]  `}> 
+
 </Image>
 </View>
 
-<View style={tw`mt-[7rem]  self-center   `}>  
-</View> 
-
-                  <Text style={tw`text-4xl text-blue-800 font-bold text-center`}>
-                      Welcome Back!
-                  </Text>
-                  <Text style={tw`text-lg text-gray-600 text-center mt-2`}>
-                      Enter Your Email & Password
-                  </Text>
-                  <View style={tw`mt-10`}>
+<View style={tw`w-full mt-[4rem] px-4 `}>
+  <Text style={tw`text-[2.5rem] font-medium`}>
+      Welcome Back !
+  </Text>
+  <Text style={tw`text-[1.1rem] text-gray-600`}>
+      Enter Your Email & Password
+  </Text>
+</View>
+<View style={tw`w-full mt-[6rem] px-4`}>
                       <Input
+                          containerStyle={tw`w-full mt-4 `}
+                          inputContainerStyle={tw`py-2`}
                           placeholder="Email"
                           keyboardType="email-address"
-                          inputStyle={tw`text-lg`}
-                          inputContainerStyle={tw`border-b-2 border-gray-300 py-2`}
-                          leftIcon={{ type: 'font-awesome', name: 'envelope', color: 'gray' }}
-                          errorMessage={errors.email}
-                          errorStyle={tw`text-red-600`}
-                          onChangeText={(text) => setEmail(text)}
+                          onChange={e => setEmail(e.nativeEvent.text)}
                       />
+                      {errors.email ? <Text style={tw`text-red-600 `}>{errors.email}</Text> : null}
                       <Input
+                          containerStyle={tw`w-full mt-4  `}
+                          inputContainerStyle={tw`py-2`}
                           placeholder="Password"
+                          keyboardType="default"
                           secureTextEntry={true}
-                          inputStyle={tw`text-lg`}
-                          inputContainerStyle={tw`border-b-2 border-gray-300 py-2 mt-4`}
-                          leftIcon={{ type: 'font-awesome', name: 'lock', color: 'gray' }}
-                          errorMessage={errors.password}
-                          errorStyle={tw`text-red-600`}
-                          onChangeText={(text) => setPassword(text)}
+                          onChange={e => setPassword(e.nativeEvent.text)}
                       />
+                      {errors.password ? <Text style={tw`text-red-600 mb-6`}>{errors.password}</Text> : null}
                   </View>
-                  <TouchableOpacity
-                      style={tw`mt-15 bg-blue-600 py-3 rounded-lg`}
-                      onPress={handleSubmit}
-                      disabled={loading}
-                  >
-                      {loading ? (
+                  <View style={tw`w-full items-center`}>
+  <TouchableOpacity style={tw`rounded-100 py-3 w-[15rem] mt-4 bg-black `} onPress={handleSubmit}
+  disabled={loading}
+  >
+     {loading ? (
                           <ActivityIndicator size="small" color="#FFF" />
                       ) : (
                           <Text style={tw`text-white text-center text-lg`}>LOGIN</Text>
                       )}
-                  </TouchableOpacity>
-                  <Text style={tw`text-red-500 text-center mt-4`}>Forgot Password?</Text>
-              </View>
-          </SafeAreaView>
+
+  
+  </TouchableOpacity>
+   <Text style={tw`mt-4 text-red-600`}>Forgot Password ?</Text>  
+</View>
+              </SafeAreaView>
+          </View>
       </ScrollView>
   );
-
 
 }
 

@@ -13,11 +13,19 @@ export class UsersService {
     return this.databaseService.users.findMany({});
   }
 
-  async findOne(id: number) {
-    return this.databaseService.users.findUnique({
-      where: { id },
-    });
+  async findOne(identifier: string) {
+    if (isNaN(Number(identifier))) {
+      return this.databaseService.users.findUnique({
+        where: { email: identifier },
+      });
+    } else {
+      return this.databaseService.users.findUnique({
+        where: { id: Number(identifier) },
+      });
+    }
   }
+  
+  
 
   async update(id: number, updateUserDto: Prisma.UsersUpdateInput) {
     return this.databaseService.users.update({
