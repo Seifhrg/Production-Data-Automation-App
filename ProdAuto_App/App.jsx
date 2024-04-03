@@ -1,40 +1,19 @@
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { NavigationContainer } from "@react-navigation/native";
+import Login from "./app/screens/Login";
+import AdminScreen from "./app/screens/AdminScreen";
 
-
-import { NavigationContainer } from '@react-navigation/native';
-import Login from './app/screens/Login';
-import AdminScreen from './app/screens/AdminScreen';
-
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useEffect, useState } from 'react';
-import Messages from './app/screens/Messages';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useEffect } from "react";
+import Messages from "./app/screens/Messages";
+import AgentHome from "./app/screens/AgentHome";
+import ResponsableStockHome from "./app/screens/ResponsableStockHome";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { AuthProvider, useAuthStore } from "./app/providers/AuthProvider";
 
 const Tab = createBottomTabNavigator();
 
-
-
-export default function App() {
-  const[IsLoggedIn,setIsLoggedIn] =useState(false)
-  const [isLoading, setIsLoading] = useState(true);
-  const Stack =createNativeStackNavigator();
-  async function getAuthValue (){
-    const data = await AsyncStorage.getItem('IsLoggedIn')
-    
-    setIsLoggedIn(data)
-    setIsLoggedIn(data === 'true');
-    setIsLoading(false); 
-  }
-
-  useEffect(()=>{
-    getAuthValue()
-    
-  },[])
-  
-  
-  
-function Home() {
+function HomeAdmin() {
   return (
     <Tab.Navigator>
       <Tab.Screen name="Home" component={AdminScreen} />
@@ -42,23 +21,54 @@ function Home() {
     </Tab.Navigator>
   );
 }
+
+export const Navigation = () => {
+  const Stack = createNativeStackNavigator();
+
+  const { isAuthenticated, user } = useAuthStore();
+
+  useEffect(() => {
+    console.log({ isAuthenticated });
+  });
   return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Login">
+        {isAuthenticated && user ? (
+          user.role === "SuperAdmin" ? (
+            <Stack.Screen
+              name="HomeAdmin"
+              component={HomeAdmin}
+              options={{ headerShown: false }}
+            />
+          ) : user.role === "Agent" ? (
+            <Stack.Screen
+              name="AgentHome"
+              component={AgentHome}
+              options={{ headerShown: false }}
+            />
+          ) : user.role === "Responsable_Stock" ? (
+            <Stack.Screen
+              name="ResponsableStockHome"
+              component={ResponsableStockHome}
+              options={{ headerShown: false }}
+            />
+          ) : null
+        ) : (
+          <Stack.Screen
+            name="Login"
+            component={Login}
+            options={{ headerShown: false }}
+          />
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
 
-<NavigationContainer>
-    <Stack.Navigator initialRouteName="Login">
-      {IsLoggedIn ? (
-        <Stack.Screen
-        name="Home"
-        component={Home}
-        options={{ headerShown: false }}
-      />
-      ) : (
-        <Stack.Screen name="Login" component={Login} options={{headerShown: false}}/>
-      )}
-    </Stack.Navigator>
-</NavigationContainer>
-
+export default function App() {
+  return (
+    <AuthProvider>
+      <Navigation />
+    </AuthProvider>
   );
 }
-
-
