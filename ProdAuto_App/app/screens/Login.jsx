@@ -10,7 +10,6 @@ import { ActivityIndicator } from "react-native";
 import tw from "twrnc";
 import { Input } from "@rneui/themed";
 import { useState } from "react";
-import { useNavigation } from "@react-navigation/native";
 
 import { useAuthStore } from "../providers/AuthProvider";
 

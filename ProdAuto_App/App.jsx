@@ -10,14 +10,25 @@ import AgentHome from "./app/screens/AgentHome";
 import ResponsableStockHome from "./app/screens/ResponsableStockHome";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { AuthProvider, useAuthStore } from "./app/providers/AuthProvider";
+import ProfileUpdate from "./app/screens/adminScreens/ProfileUpdate";
+import GetStarted from "./app/screens/GetStarted";
+import AddUser from "./app/screens/adminScreens/AddUser";
 
 const Tab = createBottomTabNavigator();
 
 function HomeAdmin() {
   return (
     <Tab.Navigator>
-      <Tab.Screen name="Home" component={AdminScreen} />
-      <Tab.Screen name="Messages" component={Messages} />
+      <Tab.Screen
+        name="Home"
+        component={AdminScreen}
+        options={{ headerShown: false }}
+      />
+      <Tab.Screen
+        name="Messages"
+        component={Messages}
+        options={{ headerShown: false }}
+      />
     </Tab.Navigator>
   );
 }
@@ -35,11 +46,28 @@ export const Navigation = () => {
       <Stack.Navigator initialRouteName="Login">
         {isAuthenticated && user ? (
           user.role === "SuperAdmin" ? (
-            <Stack.Screen
-              name="HomeAdmin"
-              component={HomeAdmin}
-              options={{ headerShown: false }}
-            />
+            <Stack.Group>
+              <Stack.Screen
+                name="GetStarted"
+                component={GetStarted}
+                options={{ headerShown: false }}
+              ></Stack.Screen>
+              <Stack.Screen
+                name="HomeAdmin"
+                component={HomeAdmin}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="ProfileUpdate"
+                component={ProfileUpdate}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="AddUser"
+                component={AddUser}
+                options={{ headerShown: false }}
+              />
+            </Stack.Group>
           ) : user.role === "Agent" ? (
             <Stack.Screen
               name="AgentHome"

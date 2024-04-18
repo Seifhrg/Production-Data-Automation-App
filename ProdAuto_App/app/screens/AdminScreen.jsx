@@ -4,81 +4,97 @@ import {
   View,
   Image,
   FlatList,
-  SafeAreaView,
   TouchableOpacity,
-  StyleSheet,
+  SafeAreaView,
+  ActivityIndicator,
 } from "react-native";
+import styles from "./Styles/AdminScreenStyles";
+import UserAvatar from "../components/UserAvatar";
 import axios from "axios";
 import { API_URL, EMPTY_IMAGE } from "@env";
-import tw from "twrnc";
-import styles from "./Styles/AdminScreenStyles";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import Icon from "react-native-vector-icons/Ionicons";
 import { useAuthStore } from "../providers/AuthProvider";
+import { useNavigation } from "@react-navigation/native";
+import CircleAvatar from "../components/CircleAvatar";
 
 export default function AdminScreen() {
   const [isLoading, setIsLoading] = useState(true);
-  const [allUserData, setAllUserData] = useState("");
+  const [allUserData, setAllUserData] = useState([]);
+  const { logout, user } = useAuthStore();
+  const navigation = useNavigation();
 
-  const { logout, user, isUserDataSet } = useAuthStore();
-
-  async function getAllData() {
-    axios
-      .get(`http://${API_URL}/users`)
-      .then((res) => {
-        setAllUserData(res.data);
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching data: ", error);
-      });
-  }
+  const getAllData = async () => {
+    try {
+      const res = await axios.get(`http://${API_URL}/users`);
+      setAllUserData(res.data);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching data: ", error);
+    }
+  };
 
   useEffect(() => {
     getAllData();
   }, []);
-  const UserCard = ({ data }) => (
-    <View style={styles.card}>
-      <Image source={{ uri: data.image || EMPTY_IMAGE }} style={styles.image} />
-      <View style={styles.cardDetails}>
-        <Text style={styles.name}>
-          {data.firstName} {data.lastName}
-        </Text>
-        <Text style={styles.email}>{data.email}</Text>
-        <Text style={styles.userType}>{data.role}</Text>
-      </View>
-      <View>
-        <Icon name="pencil" size={30} color="black" />
-      </View>
-    </View>
-  );
-  return (
-    <>
-      {isLoading ? (
-        <Text>Loading...</Text>
-      ) : (
-        <View style={styles.container}>
-          {user && isUserDataSet && (
-            <View style={styles.userInfo}>
-              <Text style={styles.userName}>
-                {user.firstName} {user.lastName}
-              </Text>
-              <Text style={styles.userType}>{user.description}</Text>
-            </View>
-          )}
-          <FlatList
-            data={allUserData}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <UserCard data={item} />}
-          />
-        </View>
-      )}
 
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.navBar}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.navIcon} // Style name adjusted to maintain consistency
+        >
+          <Icon name="arrow-back" size={24} color="#007AFF" />
+        </TouchableOpacity>
+        <Text style={styles.navBarTitle}>Admin Dashboard</Text>
+        <UserAvatar user={user} onLogout={logout} />
+      </View>
+      {isLoading ? (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color="#0066CC" />
+        </View>
+      ) : (
+        <FlatList
+          data={allUserData}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() =>
+                navigation.navigate("ProfileUpdate", {
+                  user: item,
+                  refresh: getAllData,
+                })
+              }
+            >
+              <CircleAvatar
+                firstName={item.firstName}
+                lastName={item.lastName}
+              />
+              <View style={styles.cardDetails}>
+                <Text style={styles.name}>
+                  {item.firstName} {item.lastName}
+                </Text>
+                <Text style={styles.email}>{item.email}</Text>
+                <Text style={styles.userType}>{item.role}</Text>
+              </View>
+              <Icon
+                name="pencil"
+                size={24}
+                color="#757575"
+                style={styles.actionIcon}
+              />
+            </TouchableOpacity>
+          )}
+          contentContainerStyle={styles.listContainer}
+        />
+      )}
       <TouchableOpacity
-        onPress={logout}
-        style={tw`bg-blue-500 w-full rounded-none my-0 p-3`}
+        style={styles.addButton}
+        onPress={() => navigation.navigate("AddUser", { refresh: getAllData })}
       >
-        <Text style={tw`text-base text-white text-center`}>Log Out</Text>
+        <Icon name="add" size={30} color="#FFF" />
       </TouchableOpacity>
-    </>
+    </SafeAreaView>
   );
 }
