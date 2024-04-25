@@ -9,6 +9,7 @@ import {
   Animated,
 } from "react-native";
 import { Avatar } from "react-native-paper";
+import Icon from "react-native-vector-icons/MaterialIcons"; // Importing Icon
 
 export default function UserAvatar({ user, onLogout }) {
   const [isMenuVisible, setIsMenuVisible] = useState(false);
@@ -55,12 +56,17 @@ export default function UserAvatar({ user, onLogout }) {
           <TouchableWithoutFeedback onPress={closeMenu}>
             <Animated.View style={[styles.modalOverlay, { opacity }]}>
               <View style={styles.menu}>
-                <Text style={styles.menuHeader}>{user.email}</Text>
-                <Text style={styles.menuItem}>{user.role}</Text>
+                <Text style={styles.menuHeader}>
+                  {user.firstName} {user.lastName}
+                </Text>
+                <View style={styles.roleBadge}>
+                  <Text style={styles.menuItem}>{user.role.toUpperCase()}</Text>
+                </View>
                 <TouchableOpacity
                   onPress={onLogout}
                   style={styles.logoutButton}
                 >
+                  <Icon name="logout" size={24} color="#FFFFFF" />
                   <Text style={styles.logoutButtonText}>Log Out</Text>
                 </TouchableOpacity>
               </View>
@@ -71,6 +77,7 @@ export default function UserAvatar({ user, onLogout }) {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     position: "relative",
@@ -102,23 +109,37 @@ const styles = StyleSheet.create({
     borderColor: "#E5E5E5",
   },
   menuHeader: {
-    fontSize: 18,
-    color: "#2C5282",
-    marginBottom: 16,
-    fontWeight: "600",
+    fontSize: 20, // Slightly larger font size, adjust as needed
+    color: "#000000", // Black color for text
+    marginBottom: 4, // Reduced bottom margin
+    fontWeight: "bold", // Bold font weight
+    textTransform: "uppercase", // Uppercase text
+  },
+
+  roleBadge: {
+    backgroundColor: "#EBF4FF", // Light blue background, adjust color as needed
+    alignSelf: "flex-start", // Align to the start of the menu
+    borderRadius: 15, // Half of the height and width to create a circle
+    paddingVertical: 2, // Small vertical padding
+    paddingHorizontal: 10,
+    marginBottom: 13,
   },
   menuItem: {
-    fontSize: 16,
-    color: "#2C5282",
-    marginBottom: 16,
+    fontSize: 12, // Adjust font size as needed
+    fontWeight: "bold",
+    color: "#0504AA", // Adjust text color to match your design
+    textAlign: "center",
   },
   logoutButton: {
+    flexDirection: "row", // Added for inline icon and text
+    alignItems: "center", // Align icon and text vertically
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 6,
-    backgroundColor: "#E53E3E", // Deep red for emphasis
+    backgroundColor: "#DE0A26", // Deep red for emphasis
   },
   logoutButtonText: {
+    marginLeft: 10, // Space between icon and text
     fontSize: 16,
     color: "#FFFFFF",
     fontWeight: "600",

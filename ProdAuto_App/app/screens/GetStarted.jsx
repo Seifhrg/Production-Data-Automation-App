@@ -1,121 +1,106 @@
-import React, { useRef, useEffect } from "react";
+import React from "react";
 import {
-  StyleSheet,
-  Text,
   View,
+  Text,
+  StyleSheet,
   TouchableOpacity,
-  Animated,
-  Easing,
+  ImageBackground,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import {
+  useFonts,
+  LexendDeca_400Regular,
+} from "@expo-google-fonts/lexend-deca";
+import { useNavigation } from "@react-navigation/native";
 
-const GetStarted = ({ navigation }) => {
-  const buttonScale = useRef(new Animated.Value(1)).current;
+import { useAuthStore } from "../providers/AuthProvider";
+import { AbrilFatface_400Regular } from "@expo-google-fonts/abril-fatface";
+import Icon from "react-native-vector-icons/Ionicons";
 
-  useEffect(() => {
-    // Initial fade-in animation for the entire view
-    Animated.timing(buttonScale, {
-      toValue: 1,
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
-  }, []);
+const GetStarted = () => {
+  const navigation = useNavigation();
+  const { user } = useAuthStore();
+  const [fontsLoaded] = useFonts({
+    LexendDeca_400Regular,
+    AbrilFatface_400Regular,
+  });
 
-  const handlePressIn = () => {
-    // Scale down animation when the button is pressed
-    Animated.spring(buttonScale, {
-      toValue: 0.95,
-      useNativeDriver: true,
-    }).start();
-  };
+  if (!fontsLoaded) {
+    return null; // Or a custom loading component
+  } else {
+    return (
+      <View style={styles.container}>
+        <ImageBackground
+          source={require("../../assets/Manufacturing_Mesh.jpg")}
+          resizeMode="cover"
+          style={styles.imageBackground}
+        >
+          <View style={styles.content}>
+            <Text style={[styles.text, styles.greetingText]}>
+              Bonjour {user.firstName} {user.lastName}
+            </Text>
+            <Text style={[styles.text, styles.mainText]}>
+              Accelerate the production
+            </Text>
 
-  const handlePressOut = () => {
-    // Scale back to normal when the press is released
-    Animated.spring(buttonScale, {
-      toValue: 1,
-      friction: 5,
-      tension: 200,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const handlePress = () => {
-    navigation.navigate("HomeAdmin");
-  };
-
-  return (
-    <View style={styles.container}>
-      <LinearGradient
-        colors={["#3A1C71", "#D76D77", "#FFAF7B"]}
-        style={styles.background}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      >
-        <View style={styles.content}>
-          <Text style={styles.header}>Welcome to Our App!</Text>
-          <Animated.View
-            style={[styles.button, { transform: [{ scale: buttonScale }] }]}
-          >
             <TouchableOpacity
-              onPressIn={handlePressIn}
-              onPressOut={handlePressOut}
-              onPress={handlePress}
+              style={styles.arrowButton}
               activeOpacity={0.8}
-              style={styles.buttonInner}
+              onPress={() => navigation.navigate("HomeAdmin")}
             >
-              <Text style={styles.buttonText}>Get Started</Text>
+              <Icon name="arrow-forward" size={24} color="#007AFF" />
             </TouchableOpacity>
-          </Animated.View>
-        </View>
-      </LinearGradient>
-    </View>
-  );
+          </View>
+        </ImageBackground>
+      </View>
+    );
+  }
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
-  background: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
+  imageBackground: {
+    flex: 1,
+    justifyContent: "flex-end",
   },
   content: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    padding: 20,
+    paddingBottom: 80,
   },
-  header: {
+  text: {
+    color: "#FFD700",
+    marginBottom: 16,
+  },
+  mainText: {
+    fontFamily: "LexendDeca_400Regular",
     fontSize: 28,
+    paddingBottom: 25,
+  },
+  greetingText: {
+    fontFamily: "AbrilFatface_400Regular",
+    fontSize: 32,
+  },
+  arrowButton: {
+    backgroundColor: "#FFF",
+    paddingHorizontal: 25,
+    paddingVertical: 12,
+    borderRadius: 25,
+    shadowColor: "#000000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
+    alignSelf: "flex-start",
+  },
+  arrowText: {
+    fontSize: 18,
+    color: "#FFFFFF", // White text color for contrast
     fontWeight: "bold",
-    marginBottom: 30,
-    color: "#FFF",
-    backgroundColor: "transparent",
-    textAlign: "center",
-  },
-  button: {
-    backgroundColor: "#6200EE",
-    borderRadius: 30,
-    shadowColor: "#6200EE",
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 12,
-  },
-  buttonInner: {
-    paddingHorizontal: 40,
-    paddingVertical: 20,
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 20,
-    fontWeight: "bold",
-    textTransform: "uppercase",
+    letterSpacing: 1,
   },
 });
 

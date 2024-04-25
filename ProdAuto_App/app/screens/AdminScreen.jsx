@@ -78,12 +78,6 @@ export default function AdminScreen() {
                 <Text style={styles.email}>{item.email}</Text>
                 <Text style={styles.userType}>{item.role}</Text>
               </View>
-              <Icon
-                name="pencil"
-                size={24}
-                color="#757575"
-                style={styles.actionIcon}
-              />
             </TouchableOpacity>
           )}
           contentContainerStyle={styles.listContainer}

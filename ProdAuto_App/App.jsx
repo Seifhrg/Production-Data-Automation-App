@@ -69,17 +69,31 @@ export const Navigation = () => {
               />
             </Stack.Group>
           ) : user.role === "Agent" ? (
-            <Stack.Screen
-              name="AgentHome"
-              component={AgentHome}
-              options={{ headerShown: false }}
-            />
+            <Stack.Group>
+              <Stack.Screen
+                name="GetStarted"
+                component={GetStarted}
+                options={{ headerShown: false }}
+              ></Stack.Screen>
+              <Stack.Screen
+                name="AgentHome"
+                component={AgentHome}
+                options={{ headerShown: false }}
+              />
+            </Stack.Group>
           ) : user.role === "Responsable_Stock" ? (
-            <Stack.Screen
-              name="ResponsableStockHome"
-              component={ResponsableStockHome}
-              options={{ headerShown: false }}
-            />
+            <Stack.Group>
+              <Stack.Screen
+                name="GetStarted"
+                component={GetStarted}
+                options={{ headerShown: false }}
+              ></Stack.Screen>
+              <Stack.Screen
+                name="ResponsableStockHome"
+                component={ResponsableStockHome}
+                options={{ headerShown: false }}
+              />
+            </Stack.Group>
           ) : null
         ) : (
           <Stack.Screen

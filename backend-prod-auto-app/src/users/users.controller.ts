@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpException,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -37,12 +39,16 @@ export class UsersController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    const user = await this.usersService.findOne(id);
+    if (!user) {
+      throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+    }
+    return user;
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateUserDto: Prisma.UsersUpdateInput,
   ) {
@@ -50,10 +56,18 @@ export class UsersController {
       const password = updateUserDto.password as string;
       updateUserDto.password = bcrypt.hashSync(password, 10);
     }
-    return this.usersService.update(+id, updateUserDto);
+    const updateUser = await this.usersService.update(+id, updateUserDto);
+    if (!updateUser) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    return updateUser;
   }
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  async remove(@Param('id') id: string) {
+    const result = await this.usersService.remove(+id);
+    if (!result) {
+      throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+    }
+    return result;
   }
 }

@@ -24,10 +24,14 @@ export class UsersService {
       });
     }
   }
-  
-  
 
   async update(id: number, updateUserDto: Prisma.UsersUpdateInput) {
+    const existingUser = await this.databaseService.users.findUnique({
+      where: { id },
+    });
+    if (!existingUser) {
+      return null;
+    }
     return this.databaseService.users.update({
       data: updateUserDto,
       where: { id },
@@ -35,6 +39,12 @@ export class UsersService {
   }
 
   async remove(id: number) {
+    const existingUser = await this.databaseService.users.findUnique({
+      where: { id },
+    });
+    if (!existingUser) {
+      return null;
+    }
     return this.databaseService.users.delete({
       where: { id },
     });
