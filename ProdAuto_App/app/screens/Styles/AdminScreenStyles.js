@@ -45,6 +45,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+    justifyContent: 'space-between', // Adjusted to space out content and button
+  },
+  deleteIcon: {
+    padding: 10,
+    borderRadius: 25,
+    backgroundColor: '#FFF', // Optional: can adjust for different visual feedback
+  },
+  cardTouchable: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
   image: {
     width: 60,

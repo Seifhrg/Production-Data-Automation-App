@@ -9,6 +9,7 @@ import { WorkOrderPartsListModule } from './work-order-parts-list/work-order-par
 
 import { TransactionHistoryModule } from './transaction-history/transaction-history.module';
 import { ItemLocationModule } from './item-location/item-location.module';
+import { HeaderWoModule } from './header-wo/header-wo.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ItemLocationModule } from './item-location/item-location.module';
     WorkOrderPartsListModule,
     TransactionHistoryModule,
     ItemLocationModule,
+    HeaderWoModule,
   ],
   controllers: [],
   providers: [],
