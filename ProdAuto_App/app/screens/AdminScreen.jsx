@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import styles from "./Styles/AdminScreenStyles";
-import UserAvatar from "../components/UserAvatar";
+
 import axios from "axios";
 import { API_URL } from "@env";
 import Icon from "react-native-vector-icons/Ionicons";
@@ -16,6 +16,7 @@ import { useAuthStore } from "../providers/AuthProvider";
 import { useNavigation } from "@react-navigation/native";
 import CircleAvatar from "../components/CircleAvatar";
 import CustomAlert from "../components/customAlert";
+import NavBar from "../components/NavBar";
 
 export default function AdminScreen() {
   const [isLoading, setIsLoading] = useState(true);
@@ -55,25 +56,21 @@ export default function AdminScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.navBar}>
-        <CustomAlert
-          isVisible={isModalVisible}
-          onConfirm={() => {
-            deleteUser(selectedUser.id);
-            setModalVisible(false);
-          }}
-          onCancel={() => setModalVisible(false)}
-          user={selectedUser || {}}
-        />
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.navIcon}
-        >
-          <Icon name="arrow-back" size={24} color="#007AFF" />
-        </TouchableOpacity>
-        <Text style={styles.navBarTitle}>Admin Dashboard</Text>
-        <UserAvatar user={user} onLogout={logout} />
-      </View>
+      <NavBar
+        user={user}
+        onLogout={logout}
+        onBack={() => navigation.goBack()}
+        title="Admin Dashboard"
+      />
+      <CustomAlert
+        isVisible={isModalVisible}
+        onConfirm={() => {
+          deleteUser(selectedUser.id);
+          setModalVisible(false);
+        }}
+        onCancel={() => setModalVisible(false)}
+        user={selectedUser || {}}
+      />
       {isLoading ? (
         <View style={styles.loaderContainer}>
           <ActivityIndicator size="large" color="#0066CC" />

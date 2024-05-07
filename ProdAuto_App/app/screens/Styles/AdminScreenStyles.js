@@ -6,7 +6,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f4f7fa',
     paddingTop: Platform.OS === 'ios' ? 60 : 0,
   },
-  navIcon: {
+ /*  navIcon: {
    paddingTop:30
   },
   navBar: {
@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     flex: 1,
     textAlign: 'center',
-  },
+  }, */
   loaderContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
   addButton: {
     position: 'absolute',
     right: 30,
-    bottom: 30,
+    bottom: 1,
     width: 60,
     height: 60,
     borderRadius: 30,

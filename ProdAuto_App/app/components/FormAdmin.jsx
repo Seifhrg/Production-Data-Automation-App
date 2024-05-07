@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, TextInput } from "react-native";
-import styles from "./FormAdminStyles"; // Ensure this path is correct
+import styles from "./styles/FormAdminStyles";
 import { Picker } from "@react-native-picker/picker";
 
 const FormAdmin = ({ userData, handleInputChange, errors }) => {

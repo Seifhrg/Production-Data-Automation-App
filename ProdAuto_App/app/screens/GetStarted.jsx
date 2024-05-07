@@ -16,7 +16,8 @@ import { useAuthStore } from "../providers/AuthProvider";
 import { AbrilFatface_400Regular } from "@expo-google-fonts/abril-fatface";
 import Icon from "react-native-vector-icons/Ionicons";
 
-const GetStarted = () => {
+const GetStarted = ({ route }) => {
+  const { screen } = route.params;
   const navigation = useNavigation();
   const { user } = useAuthStore();
   const [fontsLoaded] = useFonts({
@@ -45,7 +46,7 @@ const GetStarted = () => {
             <TouchableOpacity
               style={styles.arrowButton}
               activeOpacity={0.8}
-              onPress={() => navigation.navigate("HomeAdmin")}
+              onPress={() => navigation.navigate(`${screen}`)}
             >
               <Icon name="arrow-forward" size={24} color="#007AFF" />
             </TouchableOpacity>

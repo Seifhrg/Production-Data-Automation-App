@@ -13,6 +13,9 @@ import { AuthProvider, useAuthStore } from "./app/providers/AuthProvider";
 import ProfileUpdate from "./app/screens/adminScreens/ProfileUpdate";
 import GetStarted from "./app/screens/GetStarted";
 import AddUser from "./app/screens/adminScreens/AddUser";
+import WorkOrderUpdate from "./app/screens/agentScreens/WorkOrderUpdate";
+import AddWorkOrder from "./app/screens/agentScreens/AddWorkOrder";
+import WorkOrderList from "./app/components/WorkOrderList";
 
 const Tab = createBottomTabNavigator();
 
@@ -51,6 +54,7 @@ export const Navigation = () => {
                 name="GetStarted"
                 component={GetStarted}
                 options={{ headerShown: false }}
+                initialParams={{ screen: "HomeAdmin" }}
               ></Stack.Screen>
               <Stack.Screen
                 name="HomeAdmin"
@@ -74,10 +78,26 @@ export const Navigation = () => {
                 name="GetStarted"
                 component={GetStarted}
                 options={{ headerShown: false }}
+                initialParams={{ screen: "AgentHome" }}
               ></Stack.Screen>
               <Stack.Screen
                 name="AgentHome"
                 component={AgentHome}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="AddWorkOrder"
+                component={AddWorkOrder}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="WorkOrderList"
+                component={WorkOrderList}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="WorkOrderUpdate"
+                component={WorkOrderUpdate}
                 options={{ headerShown: false }}
               />
             </Stack.Group>
@@ -87,6 +107,7 @@ export const Navigation = () => {
                 name="GetStarted"
                 component={GetStarted}
                 options={{ headerShown: false }}
+                initialParams={{ screen: "ResponsableStockHome" }}
               ></Stack.Screen>
               <Stack.Screen
                 name="ResponsableStockHome"
