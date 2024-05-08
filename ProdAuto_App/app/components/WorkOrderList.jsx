@@ -6,6 +6,7 @@ import Icon from "react-native-vector-icons/Ionicons";
 
 const WorkOrderList = ({ navigation, route }) => {
   const { workOrders } = route.params;
+  const { refresh } = route.params;
 
   return (
     <View style={styles.container}>
@@ -18,6 +19,7 @@ const WorkOrderList = ({ navigation, route }) => {
         </TouchableOpacity>
         <Text style={styles.navTitle}>Work Order List</Text>
       </View>
+
       <FlatList
         data={workOrders}
         keyExtractor={(item) => item.DOCO.toString()}
@@ -27,6 +29,7 @@ const WorkOrderList = ({ navigation, route }) => {
               onPress={() =>
                 navigation.navigate("WorkOrderUpdate", {
                   workOrder: item,
+                  refresh: refresh,
                 })
               }
               style={styles.cardTouchable}
@@ -42,12 +45,6 @@ const WorkOrderList = ({ navigation, route }) => {
                   Requested Date : {item.requestedDate}
                 </Text>
               </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.deleteIcon}
-              onPress={() => console.log("Delete Pressed", item)}
-            >
-              <Icon name="trash-outline" size={24} color="#FF3B30" />
             </TouchableOpacity>
           </View>
         )}

@@ -2,30 +2,22 @@ import React, { useState } from "react";
 import {
   ScrollView,
   View,
+  TouchableOpacity,
   Text,
   TextInput,
-  TouchableOpacity,
   Modal,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { MaterialIcons } from "@expo/vector-icons";
 import styles from "./styles/workOrderStylingForm";
-
-const statusOptions = [
-  { label: "Work Order Launched", code: "10" },
-  { label: "Material Issued", code: "30" },
-  { label: "Partial Receipt", code: "45" },
-  { label: "Work Order Completed", code: "50" },
-  { label: "Accounting Completed", code: "91" },
-  { label: "Work Order Closed", code: "99" },
-];
+import { statusOptions } from "../config/StatusOptions";
 
 const WorkOrderForm = ({
   workOrderData,
   handleInputChange,
   errors,
   handleSubmit,
-  isUpdate = false, // Determines if the form is used for update
+  isUpdate = false,
 }) => {
   const [datePickerShown, setDatePickerShown] = useState({
     requestedDate: false,
@@ -36,14 +28,16 @@ const WorkOrderForm = ({
   });
   const [modalVisible, setModalVisible] = useState(false);
 
-  const handleDateChange = (event, selectedDate, key) => {
-    const currentDate = selectedDate || new Date(workOrderData[key]);
-    handleInputChange(key, currentDate);
-    setDatePickerShown({ ...datePickerShown, [key]: false });
+  const showDatePicker = (key) => {
+    setDatePickerShown((prev) => ({ ...prev, [key]: true }));
   };
 
-  const showDatePicker = (key) => {
-    setDatePickerShown({ ...datePickerShown, [key]: true });
+  const handleDateChange = (key, event, selectedDate) => {
+    setDatePickerShown((prev) => ({ ...prev, [key]: false }));
+    if (selectedDate) {
+      console.log(key, "key");
+      handleInputChange(key, selectedDate);
+    }
   };
 
   const getStatusLabelByCode = (code) => {
@@ -58,13 +52,8 @@ const WorkOrderForm = ({
           <Text style={styles.label}>
             {key
               .replace(/([A-Z])/g, " $1")
-              .trim()
               .charAt(0)
-              .toUpperCase() +
-              key
-                .replace(/([A-Z])/g, " $1")
-                .trim()
-                .slice(1)}
+              .toUpperCase() + key.replace(/([A-Z])/g, " $1").slice(1)}
           </Text>
           {key.includes("Date") ? (
             <>
@@ -73,7 +62,7 @@ const WorkOrderForm = ({
                 style={styles.datePickerButton}
               >
                 <Text style={styles.datePickerText}>
-                  {new Date(value).toDateString()}
+                  {value ? new Date(value).toDateString() : "Select Date"}
                 </Text>
                 <MaterialIcons
                   name="calendar-today"
@@ -83,11 +72,11 @@ const WorkOrderForm = ({
               </TouchableOpacity>
               {datePickerShown[key] && (
                 <DateTimePicker
-                  value={new Date(value)}
+                  value={new Date(value) || new Date()}
                   mode="date"
-                  display="spinner"
+                  display="default"
                   onChange={(event, selectedDate) =>
-                    handleDateChange(event, selectedDate, key)
+                    handleDateChange(key, event, selectedDate)
                   }
                 />
               )}
@@ -99,7 +88,7 @@ const WorkOrderForm = ({
                 style={styles.datePickerButton}
               >
                 <Text style={styles.datePickerText}>
-                  {getStatusLabelByCode(value) || "Select Status"}
+                  {getStatusLabelByCode(value)}
                 </Text>
                 <MaterialIcons
                   name="arrow-drop-down"
@@ -137,7 +126,7 @@ const WorkOrderForm = ({
             <TextInput
               style={styles.input}
               onChangeText={(text) => handleInputChange(key, text)}
-              value={value.toString()}
+              value={value ? value.toString() : ""}
               placeholderTextColor="#999"
               placeholder="Enter value"
             />

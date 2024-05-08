@@ -86,6 +86,7 @@ const AgentHome = () => {
           <Text style={styles.totalCardTitle}>Total Work Orders</Text>
           <Text style={styles.totalCardCount}>{workOrderData.length}</Text>
         </View>
+
         {[
           {
             title: statusMap["10"],
@@ -124,7 +125,10 @@ const AgentHome = () => {
             count={card.data.length.toString()}
             colors={card.colors}
             onPress={() =>
-              navigation.navigate("WorkOrderList", { workOrders: card.data })
+              navigation.navigate("WorkOrderList", {
+                workOrders: card.data,
+                refresh: getAllworkOrderData,
+              })
             }
           />
         ))}

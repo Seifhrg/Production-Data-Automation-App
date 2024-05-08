@@ -1,74 +1,67 @@
 import React, { useState } from "react";
-import { View, ScrollView, TouchableOpacity, Text, Alert } from "react-native";
+import { ScrollView, View, TouchableOpacity, Text, Alert } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import axios from "axios";
 import styles from "./Styles/WorkOrderStyle";
 import { API_URL } from "@env";
-
 import WorkOrderForm from "../../components/WorkOrderForm";
+import { statusOptions } from "../../config/StatusOptions";
 
 const WorkOrderUpdate = ({ route, navigation }) => {
   const { workOrder } = route.params;
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
+
+  const DOCO = workOrder.DOCO;
+
+  // Extract initial status code based on the label to show in the form
+  const initialStatusCode =
+    statusOptions.find((option) => option.label === workOrder.statusCode)
+      ?.code || workOrder.statusCode;
 
   const [workOrderData, setWorkOrderData] = useState({
     quantityOrdered: workOrder.quantityOrdered,
-    requestedDate: workOrder.requestedDate,
-    workOrderDate: workOrder.workOrderDate,
-    startDate: workOrder.startDate,
+    requestedDate: new Date(workOrder.requestedDate),
+    workOrderDate: new Date(workOrder.workOrderDate),
+    startDate: new Date(workOrder.startDate),
     quantityShipped: workOrder.quantityShipped,
     quantityCanceled: workOrder.quantityCanceled,
     unaccountedDirectLaborHours: workOrder.unaccountedDirectLaborHours,
     documentType: workOrder.documentType,
-    statusChangeDate: workOrder.statusChangeDate,
-    statusCode: workOrder.statusCode,
-    completionDate: workOrder.completionDate,
+    statusChangeDate: new Date(workOrder.statusChangeDate),
+    statusCode: initialStatusCode,
+    completionDate: new Date(workOrder.completionDate),
   });
-  function validateInput() {
-    let newErrors = {};
 
+  const [errors, setErrors] = useState({});
+
+  const handleInputChange = (field, value) => {
+    if (field === "statusCode" && typeof value === "string") {
+      const foundStatus = statusOptions.find(
+        (option) => option.label === value
+      );
+      value = foundStatus ? foundStatus.code : value;
+    }
+    setWorkOrderData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: null }));
+    }
+  };
+
+  const validateInput = () => {
+    let newErrors = {};
     if (!workOrderData.documentType) {
       newErrors.documentType = "Document type is required";
     }
     if (!workOrderData.statusCode) {
       newErrors.statusCode = "Status code is required";
     }
-    if (
-      workOrderData.quantityOrdered === "" ||
-      isNaN(workOrderData.quantityOrdered) ||
-      parseInt(workOrderData.quantityOrdered) < 1
-    ) {
-      newErrors.quantityOrdered = "Quantity ordered must be a positive number";
-    }
-    if (
-      isNaN(workOrderData.quantityShipped) ||
-      parseInt(workOrderData.quantityShipped) < 0
-    ) {
-      newErrors.quantityShipped = "Quantity shipped cannot be negative";
-    }
-    if (
-      isNaN(workOrderData.quantityCanceled) ||
-      parseInt(workOrderData.quantityCanceled) < 0
-    ) {
-      newErrors.quantityCanceled = "Quantity canceled cannot be negative";
-    }
-    if (
-      isNaN(workOrderData.unaccountedDirectLaborHours) ||
-      parseInt(workOrderData.unaccountedDirectLaborHours) < 0
-    ) {
-      newErrors.unaccountedDirectLaborHours =
-        "Unaccounted direct labor hours cannot be negative";
-    }
-
+    // Add other necessary validations
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }
+  };
 
-  function handleSubmit() {
+  const handleSubmit = async () => {
     if (validateInput()) {
-      setLoading(true);
-      const updatedData = {
+      const payload = {
         ...workOrderData,
         quantityOrdered: parseInt(workOrderData.quantityOrdered, 10),
         quantityShipped: parseInt(workOrderData.quantityShipped, 10),
@@ -77,43 +70,33 @@ const WorkOrderUpdate = ({ route, navigation }) => {
           workOrderData.unaccountedDirectLaborHours,
           10
         ),
+        statusCode: workOrderData.statusCode,
       };
 
-      axios
-        .patch(`http://${API_URL}/work-orders/${workOrder.DOCO}`, updatedData)
-        .then((res) => {
-          Alert.alert("Success", "New Work Order Added");
-          if (route.params?.refresh) {
-            route.params.refresh();
-          }
-          navigation.goBack();
-        })
-        .catch((error) => {
-          console.log(updatedData);
-          console.error("Add Failed", error);
-          Alert.alert(
-            "Error",
-            "Failed to add the work order. Please try again."
-          );
-        })
-        .finally(() => setLoading(false));
+      try {
+        const response = await axios.patch(
+          `http://${API_URL}/work-orders/${DOCO}`,
+          payload
+        );
+        Alert.alert("Success", "Work Order Updated Successfully");
+        console.log(response);
+        if (route.params.refresh) {
+          route.params.refresh();
+        }
+        navigation.goBack();
+      } catch (error) {
+        console.error("Update error:", error);
+        Alert.alert(
+          "Error",
+          "Failed to update the work order. Please try again."
+        );
+      }
     } else {
       let errorMessages = Object.values(errors).join("\n");
-      Alert.alert(
-        "Validation Error",
-        errorMessages ||
-          "Please fill all necessary fields correctly and try again."
-      );
-    }
-  }
-  const handleInputChange = (field, value) => {
-    setWorkOrderData({ ...workOrderData, [field]: value });
-    // Also clear errors as the user types
-    if (errors[field]) {
-      setErrors({ ...errors, [field]: null });
+      Alert.alert("Validation Error", errorMessages);
     }
   };
-  console.log(workOrderData);
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.navBar}>
@@ -123,13 +106,14 @@ const WorkOrderUpdate = ({ route, navigation }) => {
         >
           <Icon name="arrow-back" size={24} color="#007AFF" />
         </TouchableOpacity>
-        <Text style={styles.navTitle}>Update Work Order</Text>
+        <Text style={styles.navTitle}> Work Order Details</Text>
       </View>
       <WorkOrderForm
         workOrderData={workOrderData}
         handleInputChange={handleInputChange}
         errors={errors}
         handleSubmit={handleSubmit}
+        isUpdate={true}
       />
     </ScrollView>
   );

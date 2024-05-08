@@ -8,7 +8,11 @@ const CustomAlert = ({ isVisible, onConfirm, onCancel, user }) => {
       <View style={styles.modalContent}>
         <Text style={styles.modalTitle}>Delete User</Text>
         <Text style={styles.modalMessage}>
-          Are you sure you want to delete {user.firstName} {user.lastName}'s
+          Are you sure you want to delete
+          <Text style={styles.boldBlueText}>
+            {" "}
+            {user.firstName} {user.lastName}{" "}
+          </Text>
           profile?
         </Text>
         <View style={styles.buttonContainer}>
@@ -34,6 +38,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(0, 0, 0, 0.1)",
   },
   modalTitle: {
+    color: "red",
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 10,
@@ -43,6 +48,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: "center",
   },
+  boldBlueText: {
+    fontWeight: "bold",
+    fontSize: 16,
+    color: "blue",
+  },
+
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",

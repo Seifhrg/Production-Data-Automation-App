@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { View, ScrollView, TouchableOpacity, Text, Alert } from "react-native";
+import { ScrollView, View, TouchableOpacity, Text, Alert } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import axios from "axios";
 import styles from "./Styles/WorkOrderStyle";
 import { API_URL } from "@env";
-
 import WorkOrderForm from "../../components/WorkOrderForm";
+import { statusOptions } from "../../config/StatusOptions";
 
 export default function AddWorkOrder({ navigation, route }) {
   const [workOrderData, setWorkOrderData] = useState({
@@ -18,7 +18,7 @@ export default function AddWorkOrder({ navigation, route }) {
     unaccountedDirectLaborHours: "0",
     documentType: "",
     statusChangeDate: new Date(),
-    statusCode: "",
+    statusCode: "", // Initialize as empty or set a default code
     completionDate: new Date(),
   });
   const [loading, setLoading] = useState(false);
@@ -26,40 +26,13 @@ export default function AddWorkOrder({ navigation, route }) {
 
   function validateInput() {
     let newErrors = {};
-
     if (!workOrderData.documentType) {
       newErrors.documentType = "Document type is required";
     }
     if (!workOrderData.statusCode) {
       newErrors.statusCode = "Status code is required";
     }
-    if (
-      workOrderData.quantityOrdered === "" ||
-      isNaN(workOrderData.quantityOrdered) ||
-      parseInt(workOrderData.quantityOrdered) < 1
-    ) {
-      newErrors.quantityOrdered = "Quantity ordered must be a positive number";
-    }
-    if (
-      isNaN(workOrderData.quantityShipped) ||
-      parseInt(workOrderData.quantityShipped) < 0
-    ) {
-      newErrors.quantityShipped = "Quantity shipped cannot be negative";
-    }
-    if (
-      isNaN(workOrderData.quantityCanceled) ||
-      parseInt(workOrderData.quantityCanceled) < 0
-    ) {
-      newErrors.quantityCanceled = "Quantity canceled cannot be negative";
-    }
-    if (
-      isNaN(workOrderData.unaccountedDirectLaborHours) ||
-      parseInt(workOrderData.unaccountedDirectLaborHours) < 0
-    ) {
-      newErrors.unaccountedDirectLaborHours =
-        "Unaccounted direct labor hours cannot be negative";
-    }
-
+    // Add other validations as necessary
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
@@ -67,52 +40,63 @@ export default function AddWorkOrder({ navigation, route }) {
   function handleSubmit() {
     if (validateInput()) {
       setLoading(true);
-      const updatedData = {
+
+      // Prepare data for submission by converting relevant fields to integers
+      const formData = {
         ...workOrderData,
-        quantityOrdered: parseInt(workOrderData.quantityOrdered, 10),
-        quantityShipped: parseInt(workOrderData.quantityShipped, 10),
-        quantityCanceled: parseInt(workOrderData.quantityCanceled, 10),
+        quantityOrdered: parseInt(workOrderData.quantityOrdered, 10), // Convert to integer
+        quantityShipped: parseInt(workOrderData.quantityShipped, 10), // Convert to integer
+        quantityCanceled: parseInt(workOrderData.quantityCanceled, 10), // Convert to integer
         unaccountedDirectLaborHours: parseInt(
           workOrderData.unaccountedDirectLaborHours,
           10
-        ),
+        ), // Convert to integer
       };
 
       axios
-        .post(`http://${API_URL}/work-orders`, updatedData)
+        .post(`http://${API_URL}/work-orders`, formData)
         .then((res) => {
           Alert.alert("Success", "New Work Order Added");
-          if (route.params?.refresh) {
+          if (route.params.refresh) {
             route.params.refresh();
           }
           navigation.goBack();
         })
         .catch((error) => {
-          console.log(updatedData);
-          console.error("Add Failed", error);
           Alert.alert(
             "Error",
             "Failed to add the work order. Please try again."
           );
+          console.error("Submission error:", error);
         })
         .finally(() => setLoading(false));
     } else {
       let errorMessages = Object.values(errors).join("\n");
-      Alert.alert(
-        "Validation Error",
-        errorMessages ||
-          "Please fill all necessary fields correctly and try again."
-      );
+      Alert.alert("Validation Error", errorMessages);
     }
   }
 
-  const handleInputChange = (field, value) => {
-    setWorkOrderData({ ...workOrderData, [field]: value });
-    // Also clear errors as the user types
-    if (errors[field]) {
-      setErrors({ ...errors, [field]: null });
+  function handleInputChange(field, value) {
+    // Handle converting status labels to codes
+    if (field === "statusCode" && typeof value === "string") {
+      const foundStatus = statusOptions.find(
+        (option) => option.label === value
+      );
+      value = foundStatus ? foundStatus.code : value; // ensure fallback to the original value if not found
     }
-  };
+
+    setWorkOrderData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+
+    if (errors[field]) {
+      setErrors((prev) => ({
+        ...prev,
+        [field]: null,
+      }));
+    }
+  }
 
   return (
     <ScrollView style={styles.container}>
