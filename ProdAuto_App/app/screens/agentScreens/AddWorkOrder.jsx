@@ -7,7 +7,7 @@ import { API_URL } from "@env";
 import WorkOrderForm from "../../components/WorkOrderForm";
 import { statusOptions } from "../../config/StatusOptions";
 
-export default function AddWorkOrder({ navigation, route }) {
+export default function AddWorkOrder({ navigation }) {
   const [workOrderData, setWorkOrderData] = useState({
     quantityOrdered: "",
     requestedDate: new Date(),
@@ -57,9 +57,7 @@ export default function AddWorkOrder({ navigation, route }) {
         .post(`http://${API_URL}/work-orders`, formData)
         .then((res) => {
           Alert.alert("Success", "New Work Order Added");
-          if (route.params.refresh) {
-            route.params.refresh();
-          }
+          console.log(res);
           navigation.goBack();
         })
         .catch((error) => {

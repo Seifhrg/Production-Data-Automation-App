@@ -7,3 +7,13 @@ export const statusOptions = [
     { label: "Work Order Closed", code: "99" },
     { label: "Work Order Cancelled", code: "98" },
   ];
+
+
+export const statusMap = {
+  10: "Work Order Launched",
+  30: "Material Issued",
+  45: "Partial Receipt",
+  50: "Work Order Completed",
+  91: "Accounting Completed",
+  99: "Work Order Closed",
+};

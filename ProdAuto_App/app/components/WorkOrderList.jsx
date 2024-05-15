@@ -1,12 +1,29 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FlatList, Text, TouchableOpacity, View } from "react-native";
 import styles from "./styles/WorkOrderListStyles";
 import CircleAvatar from "./CircleAvatar";
 import Icon from "react-native-vector-icons/Ionicons";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchWorkOrders } from "../store/Actions/WorkOrdersActions";
+
+import { statusMap } from "../config/StatusOptions";
 
 const WorkOrderList = ({ navigation, route }) => {
-  const { workOrders } = route.params;
-  const { refresh } = route.params;
+  const dispatch = useDispatch();
+  const workOrders = useSelector((state) => state.workOrders.workOrders);
+  const status = route.params.status;
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      dispatch(fetchWorkOrders());
+    });
+
+    return unsubscribe;
+  }, [navigation, dispatch]);
+
+  const filteredData = workOrders.filter(
+    (order) => statusMap[order.statusCode] === status
+  );
 
   return (
     <View style={styles.container}>
@@ -21,7 +38,7 @@ const WorkOrderList = ({ navigation, route }) => {
       </View>
 
       <FlatList
-        data={workOrders}
+        data={filteredData}
         keyExtractor={(item) => item.DOCO.toString()}
         renderItem={({ item }) => (
           <View style={styles.card}>
@@ -29,7 +46,6 @@ const WorkOrderList = ({ navigation, route }) => {
               onPress={() =>
                 navigation.navigate("WorkOrderUpdate", {
                   workOrder: item,
-                  refresh: refresh,
                 })
               }
               style={styles.cardTouchable}
@@ -40,7 +56,9 @@ const WorkOrderList = ({ navigation, route }) => {
                 <Text style={styles.quantityOrdered}>
                   Quantity Ordered: {item.quantityOrdered}
                 </Text>
-                <Text style={styles.statusCode}>Status: {item.statusCode}</Text>
+                <Text style={styles.statusCode}>
+                  Status: {statusMap[item.statusCode]}
+                </Text>
                 <Text style={styles.requestedDate}>
                   Requested Date : {item.requestedDate}
                 </Text>

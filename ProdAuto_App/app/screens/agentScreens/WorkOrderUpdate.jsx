@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollView, View, TouchableOpacity, Text, Alert } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import axios from "axios";
@@ -80,9 +80,7 @@ const WorkOrderUpdate = ({ route, navigation }) => {
         );
         Alert.alert("Success", "Work Order Updated Successfully");
         console.log(response);
-        if (route.params.refresh) {
-          route.params.refresh();
-        }
+
         navigation.goBack();
       } catch (error) {
         console.error("Update error:", error);

@@ -16,6 +16,8 @@ import AddUser from "./app/screens/adminScreens/AddUser";
 import WorkOrderUpdate from "./app/screens/agentScreens/WorkOrderUpdate";
 import AddWorkOrder from "./app/screens/agentScreens/AddWorkOrder";
 import WorkOrderList from "./app/components/WorkOrderList";
+import { Provider } from "react-redux";
+import Store from "./app/store/Store";
 
 const Tab = createBottomTabNavigator();
 
@@ -130,8 +132,10 @@ export const Navigation = () => {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Navigation />
-    </AuthProvider>
+    <Provider store={Store}>
+      <AuthProvider>
+        <Navigation />
+      </AuthProvider>
+    </Provider>
   );
 }
