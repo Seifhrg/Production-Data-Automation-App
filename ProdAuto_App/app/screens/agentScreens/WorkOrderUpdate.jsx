@@ -105,6 +105,17 @@ const WorkOrderUpdate = ({ route, navigation }) => {
           <Icon name="arrow-back" size={24} color="#007AFF" />
         </TouchableOpacity>
         <Text style={styles.navTitle}> Work Order Details</Text>
+
+        {/*just for testing */}
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate("ListArticles", { workOrder: workOrder })
+          }
+        >
+          <Text>Article List just For testing</Text>
+        </TouchableOpacity>
+
+        {/*just for testing */}
       </View>
       <WorkOrderForm
         workOrderData={workOrderData}

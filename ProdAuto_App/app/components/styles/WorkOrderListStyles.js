@@ -77,5 +77,21 @@ const styles = StyleSheet.create({
     listContainer: {
       paddingVertical: 20,
     },
+    addButton: {
+      position: 'absolute',
+      right: 30,
+      bottom: 30,
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      backgroundColor: '#007AFF',
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.8,
+      shadowRadius: 4,
+      elevation: 6,
+    },
   });
 export default styles;  

@@ -32,6 +32,30 @@ export default function AddWorkOrder({ navigation }) {
     if (!workOrderData.statusCode) {
       newErrors.statusCode = "Status code is required";
     }
+    if (
+      isNaN(workOrderData.quantityOrdered) ||
+      workOrderData.quantityOrdered < 0
+    ) {
+      newErrors.quantityOrdered = " must be a  number";
+    }
+    if (
+      isNaN(workOrderData.quantityShipped) ||
+      workOrderData.quantityShipped < 0
+    ) {
+      newErrors.quantityShipped = " must be a  number";
+    }
+    if (
+      isNaN(workOrderData.quantityCanceled) ||
+      workOrderData.quantityCanceled < 0
+    ) {
+      newErrors.quantityCanceled = " must be a  number";
+    }
+    if (
+      isNaN(workOrderData.unaccountedDirectLaborHours) ||
+      workOrderData.unaccountedDirectLaborHours < 0
+    ) {
+      newErrors.unaccountedDirectLaborHours = " must be a  number";
+    }
     // Add other validations as necessary
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

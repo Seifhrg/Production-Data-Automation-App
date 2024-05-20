@@ -1,0 +1,136 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id          Int    @id @default(autoincrement())
+  email       String @unique
+  firstName   String
+  lastName    String
+  password    String
+  description String
+  phoneNumber String @unique
+  address     String
+  role        Role
+}
+
+enum Role {
+  SuperAdmin
+  Agent
+  Responsable_Stock
+}
+
+//F4801T  entete Ordre de fabrication 
+//fk id workorder
+model HeaderWO {
+  numOF      Int       @id
+  workOrder  WorkOrder @relation(fields: [numOF], references: [DOCO])
+  costMethod String
+}
+
+//is documentType is a unique field in 4801??
+//F4801 Ordre de fabrication  remember that the document type is the same in the F4111 and F3111
+model WorkOrder {
+  DOCO                        Int                  @id @default(autoincrement())
+  quantityOrdered             Int
+  startDate                   DateTime
+  requestedDate               DateTime
+  workOrderDate               DateTime
+  quantityShipped             Int                  @default(0)
+  quantityCanceled            Int                  @default(0)
+  unaccountedDirectLaborHours Int                  @default(0)
+  documentType                String
+  statusChangeDate            DateTime
+  statusCode                  String
+  completionDate              DateTime
+  updatedDate                 DateTime             @updatedAt
+  HeaderWO                    HeaderWO?
+  WorkOrderRouting            WorkOrderRouting[]
+  WorkOrderPartsList          WorkOrderPartsList[]
+}
+
+//F3112 gamme de fabrication
+model WorkOrderRouting {
+  numOF                    Int
+  workOrder                WorkOrder @relation(fields: [numOF], references: [DOCO])
+  sequenceNumberOperations String
+  businessUnit             String
+  typeOperationCode        String
+  runLabour                Int
+  runMachine               Int
+  setupLabor               Int
+
+  @@id([numOF, sequenceNumberOperations, businessUnit, typeOperationCode])
+}
+
+//ALL ABOVE IS DONE !!
+
+//F3111 nomenclature            remember that the document type is the same in the F4111 and F4801
+
+///all we have to do is to verify between code articles coming from itemLocation and WorkOrderPartsList    LITM AND CPIT 
+
+/////// warning    18/05/2024 /////////////////////////
+/// here we have a problem the same NUMof cant be used twice in partList , but we can use it multiple time here so it need to be fixedd
+model WorkOrderPartsList {
+  numOF                        Int                @unique
+  workOrder                    WorkOrder          @relation(fields: [numOF], references: [DOCO])
+  CPIT                         String             @unique //codeArticle
+  UKID                         Int                @default(autoincrement())
+  quantityOrdered              Int
+  issuedQuantity               Int
+  unaccountedDirectLaborHours  Int
+  unaccountedDirectLaborAmount Int
+  updatedDate                  DateTime           @updatedAt
+  quantityCanceled             Int                @default(0)
+  documentType                 String
+  TransationHistory            TransationHistory?
+  itemLocation                 ItemLocation       @relation(fields: [codeArticleLocation], references: [LITM])
+  codeArticleLocation          String
+
+  @@id([CPIT, UKID])
+  @@unique([numOF, CPIT])
+}
+
+//remember that the document type is the same in the F4801 and F3111
+//fk ITM
+//f4111
+///all we have to do is to verify between code articles coming from itemLocation and WorkOrderPartsList    LITM AND CPIT 
+model TransationHistory {
+  numOF                   Int
+  UKID                    Int      @id @default(autoincrement())
+  codeArticle             String   @unique //cpit
+  codeArticleLocation     String   @unique //LITM
+  orderAndTransactionDate DateTime
+  recordCreationDate      DateTime @default(now())
+  postedCode              String
+  documentType            String
+
+  WorkOrderPartsList WorkOrderPartsList @relation(fields: [numOF, codeArticle], references: [numOF, CPIT])
+  itemLocation       ItemLocation       @relation(fields: [codeArticleLocation], references: [LITM])
+
+  @@unique([numOF, codeArticle])
+}
+
+//f41021       1..1 relations between 4111 and 41021 change it in conception
+model ItemLocation {
+  LITM               String               @id //codeArticle 
+  lotStatusCode      String
+  quantityOnHand     Int
+  quantityReserved   Int
+  quantityAvailable  Int
+  TransationHistory  TransationHistory?
+  WorkOrderPartsList WorkOrderPartsList[]
+
+  @@unique([LITM])
+}

@@ -126,7 +126,9 @@ const WorkOrderForm = ({
             <TextInput
               style={styles.input}
               onChangeText={(text) => handleInputChange(key, text)}
-              value={value ? value.toString() : ""}
+              value={
+                value !== null && value !== undefined ? value.toString() : ""
+              }
               placeholderTextColor="#999"
               placeholder="Enter value"
             />

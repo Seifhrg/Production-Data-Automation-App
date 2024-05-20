@@ -18,6 +18,9 @@ import AddWorkOrder from "./app/screens/agentScreens/AddWorkOrder";
 import WorkOrderList from "./app/components/WorkOrderList";
 import { Provider } from "react-redux";
 import Store from "./app/store/Store";
+import ListArticles from "./app/components/ArticlesOf/ListArticles";
+import AddArticle from "./app/screens/agentScreens/AddArticle";
+import UpdateArticle from "./app/screens/agentScreens/UpdateArticle";
 
 const Tab = createBottomTabNavigator();
 
@@ -102,6 +105,23 @@ export const Navigation = () => {
                 component={WorkOrderUpdate}
                 options={{ headerShown: false }}
               />
+              {/* For testing only */}
+              <Stack.Screen
+                name="ListArticles"
+                component={ListArticles}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="AddArticle"
+                component={AddArticle}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="UpdateArticle"
+                component={UpdateArticle}
+                options={{ headerShown: false }}
+              />
+              {/* For testing only */}
             </Stack.Group>
           ) : user.role === "Responsable_Stock" ? (
             <Stack.Group>
