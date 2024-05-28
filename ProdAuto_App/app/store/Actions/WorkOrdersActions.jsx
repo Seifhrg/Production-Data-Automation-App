@@ -20,6 +20,14 @@ export const fetchWorkOrdersFailure = (error) => ({
   type: FETCH_WORK_ORDERS_FAILURE,
   payload: error,
 });
+////////////////////////////////////////////////////
+export const selectWorkOrder = (workOrder) => {
+  return {
+    type: "SELECT_WORK_ORDER",
+    payload: workOrder,
+  };
+};
+////////////////////////////////////////////////////
 
 export const fetchWorkOrders = () => async (dispatch) => {
   dispatch(fetchWorkOrdersRequest());

@@ -6,9 +6,17 @@ import styles from "./Styles/WorkOrderStyle";
 import { API_URL } from "@env";
 import WorkOrderForm from "../../components/WorkOrderForm";
 import { statusOptions } from "../../config/StatusOptions";
+import { useSelector } from "react-redux"; // import useSelector
 
-const WorkOrderUpdate = ({ route, navigation }) => {
-  const { workOrder } = route.params;
+const WorkOrderUpdate = ({ navigation }) => {
+  const workOrder = useSelector((state) => state.workOrders.selectedWorkOrder); // retrieve the selected workOrder from the store
+  console.log("from redux", workOrder);
+  if (!workOrder) {
+    // handle the case where workOrder is null
+    Alert.alert("Error", "No work order selected.");
+    navigation.goBack();
+    return null;
+  }
 
   const DOCO = workOrder.DOCO;
 
@@ -107,11 +115,7 @@ const WorkOrderUpdate = ({ route, navigation }) => {
         <Text style={styles.navTitle}> Work Order Details</Text>
 
         {/*just for testing */}
-        <TouchableOpacity
-          onPress={() =>
-            navigation.navigate("ListArticles", { workOrder: workOrder })
-          }
-        >
+        <TouchableOpacity onPress={() => navigation.navigate("ListArticles")}>
           <Text>Article List just For testing</Text>
         </TouchableOpacity>
 

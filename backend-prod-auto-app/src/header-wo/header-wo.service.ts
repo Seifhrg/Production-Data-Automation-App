@@ -5,6 +5,8 @@ import { DatabaseService } from 'src/database/database.service';
 @Injectable()
 export class HeaderWoService {
   constructor(private readonly databaseService: DatabaseService) {}
+
+  //responsible for the interaction with te db
   create(createHeaderWoDto: Prisma.HeaderWOCreateInput) {
     return this.databaseService.headerWO.create({ data: createHeaderWoDto });
   }

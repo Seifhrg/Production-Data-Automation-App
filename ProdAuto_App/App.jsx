@@ -40,6 +40,22 @@ function HomeAdmin() {
     </Tab.Navigator>
   );
 }
+/* function WorkOrderDetails() {
+  return (
+    <Tab.Navigator>
+      <Tab.Screen
+        name="WorkOrderUpdate"
+        component={WorkOrderUpdate}
+        options={{ headerShown: false }}
+      />
+      <Tab.Screen
+        name="ListArticles"
+        component={ListArticles}
+        options={{ headerShown: false }}
+      />
+    </Tab.Navigator>
+  );
+} */
 
 export const Navigation = () => {
   const Stack = createNativeStackNavigator();

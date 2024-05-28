@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -58,6 +52,7 @@ model WorkOrder {
   HeaderWO                    HeaderWO?
   WorkOrderRouting            WorkOrderRouting[]
   WorkOrderPartsList          WorkOrderPartsList[]
+  TransationHistory           TransationHistory[]
 }
 
 //F3112 gamme de fabrication
@@ -79,7 +74,7 @@ model WorkOrderRouting {
 //F3111 nomenclature            remember that the document type is the same in the F4111 and F4801
 
 model WorkOrderPartsList {
-  numOF                        Int                @unique
+  numOF                        Int
   workOrder                    WorkOrder          @relation(fields: [numOF], references: [DOCO])
   LITM                         String             @unique //CPIT
   UKID                         Int                @default(autoincrement())
@@ -93,7 +88,6 @@ model WorkOrderPartsList {
   TransationHistory            TransationHistory?
 
   @@id([LITM, UKID])
-  @@unique([numOF, LITM])
 }
 
 //remember that the document type is the same in the F4801 and F3111
@@ -108,9 +102,8 @@ model TransationHistory {
   postedCode              String
   documentType            String
   ItemLocation            ItemLocation?
-  WorkOrderPartsList      WorkOrderPartsList @relation(fields: [numOF, codeArticle], references: [numOF, LITM])
-
-  @@unique([numOF, codeArticle])
+  WorkOrderPartsList      WorkOrderPartsList @relation(fields: [codeArticle], references: [LITM])
+  workOrder               WorkOrder          @relation(fields: [numOF], references: [DOCO])
 }
 
 //f41021       1..1 relations between 4111 and 41021 change it in conception
@@ -123,4 +116,16 @@ model ItemLocation {
   quantityAvailable Int
 
   @@unique([codeArticle])
+}
+
+model Log {
+  id         Int      @id @default(autoincrement())
+  action     String
+  entity     String //as workorder ,stock,article ...
+  entityId   Int?
+  userId     Int?
+  timestamp  DateTime @default(now())
+  method     String?
+  url        String?
+  statusCode Int? // as 404 or 200 ...
 }

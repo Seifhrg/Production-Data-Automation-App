@@ -4,10 +4,18 @@ import styles from "../styles/WorkOrderListStyles";
 import CircleAvatar from "../CircleAvatar";
 import Icon from "react-native-vector-icons/Ionicons";
 import axios from "axios";
+import { useSelector } from "react-redux";
 import { API_URL } from "@env";
 
-const ListArticles = ({ navigation, route }) => {
-  const { workOrder } = route.params;
+const ListArticles = ({ navigation }) => {
+  const workOrder = useSelector((state) => state.workOrders.selectedWorkOrder); // retrieve the selected workOrder from the store
+  console.log("from redux", workOrder);
+  if (!workOrder) {
+    // handle the case where workOrder is null
+    Alert.alert("Error", "No work order selected.");
+    navigation.goBack();
+    return null;
+  }
   console.log(workOrder, "from article list ");
   const [ArticleData, setArticleData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

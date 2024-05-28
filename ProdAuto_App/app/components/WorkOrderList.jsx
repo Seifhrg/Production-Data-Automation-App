@@ -4,7 +4,10 @@ import styles from "./styles/WorkOrderListStyles";
 import CircleAvatar from "./CircleAvatar";
 import Icon from "react-native-vector-icons/Ionicons";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchWorkOrders } from "../store/Actions/WorkOrdersActions";
+import {
+  fetchWorkOrders,
+  selectWorkOrder,
+} from "../store/Actions/WorkOrdersActions"; // import the new action
 
 import { statusMap } from "../config/StatusOptions";
 
@@ -24,7 +27,6 @@ const WorkOrderList = ({ navigation, route }) => {
   const filteredData = workOrders.filter(
     (order) => statusMap[order.statusCode] === status
   );
-
   return (
     <View style={styles.container}>
       <View style={styles.navBar}>
@@ -43,11 +45,10 @@ const WorkOrderList = ({ navigation, route }) => {
         renderItem={({ item }) => (
           <View style={styles.card}>
             <TouchableOpacity
-              onPress={() =>
-                navigation.navigate("WorkOrderUpdate", {
-                  workOrder: item,
-                })
-              }
+              onPress={() => {
+                dispatch(selectWorkOrder(item)); // dispatch the new action
+                navigation.navigate("WorkOrderUpdate");
+              }}
               style={styles.cardTouchable}
             >
               <CircleAvatar doco={item.DOCO} />
