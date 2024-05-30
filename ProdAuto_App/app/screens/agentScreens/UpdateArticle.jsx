@@ -5,8 +5,10 @@ import axios from "axios";
 import styles from "./Styles/WorkOrderStyle";
 import { API_URL } from "@env";
 import ArticleForm from "../../components/ArticlesOf/ArticleForm";
+import { useAuthStore } from "../../providers/AuthProvider";
 
 const UpdateArticle = ({ route, navigation }) => {
+  const { token } = useAuthStore();
   const { article } = route.params;
   const LITM = article.LITM;
   const UKID = article.UKID;
@@ -83,7 +85,10 @@ const UpdateArticle = ({ route, navigation }) => {
       try {
         const response = await axios.patch(
           `http://${API_URL}/work-order-parts-list/${LITM}/${UKID}`,
-          payload
+          payload,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
         );
         Alert.alert("Success", "Article Updated Successfully");
         console.log(response);

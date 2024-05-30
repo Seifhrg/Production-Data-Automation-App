@@ -25,6 +25,7 @@ export default function AdminScreen() {
   const navigation = useNavigation();
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const { token } = useAuthStore();
 
   const confirmDelete = (user) => {
     setSelectedUser(user);
@@ -33,7 +34,9 @@ export default function AdminScreen() {
 
   const deleteUser = async (userId) => {
     try {
-      res = await axios.delete(`http://${API_URL}/users/${userId}`);
+      res = await axios.delete(`http://${API_URL}/users/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       getAllData();
     } catch (error) {
       console.error("Error fetching data: ", error);
@@ -42,7 +45,9 @@ export default function AdminScreen() {
 
   const getAllData = async () => {
     try {
-      const res = await axios.get(`http://${API_URL}/users`);
+      const res = await axios.get(`http://${API_URL}/users`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setAllUserData(res.data);
       setIsLoading(false);
     } catch (error) {

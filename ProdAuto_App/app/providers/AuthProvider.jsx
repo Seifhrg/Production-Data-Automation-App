@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { createContext, useContext, useState, useEffect, useRef } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { Alert } from "react-native";
 import axios from "axios";
 import { API_URL } from "@env";
@@ -92,6 +92,7 @@ export const AuthProvider = ({ children }) => {
         logout,
         initialize,
         isAuthenticated: Boolean(token),
+        token: token,
         isLoading,
       }}
     >

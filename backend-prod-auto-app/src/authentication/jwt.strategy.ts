@@ -12,14 +12,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       secretOrKey: process.env.JWT_SECRET,
     });
   }
-  async validate(payload: { email: any }) {
+  //users --> user
+  async validate(payload: { email: any; id: any }) {
     console.log(payload);
 
-    const users = await this.databaseService.users.findUnique({
+    const user = await this.databaseService.users.findUnique({
       where: {
         email: payload.email,
+        id: payload.id,
       },
     });
-    return users;
+    console.log('User in jwtStrategy:', user);
+    return user;
   }
 }

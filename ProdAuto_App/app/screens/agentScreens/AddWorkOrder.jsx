@@ -6,8 +6,11 @@ import styles from "./Styles/WorkOrderStyle";
 import { API_URL } from "@env";
 import WorkOrderForm from "../../components/WorkOrderForm";
 import { statusOptions } from "../../config/StatusOptions";
+import { useAuthStore } from "../../providers/AuthProvider";
 
 export default function AddWorkOrder({ navigation }) {
+  const { token } = useAuthStore();
+  console.log("token from useAuthStore", token);
   const [workOrderData, setWorkOrderData] = useState({
     quantityOrdered: "",
     requestedDate: new Date(),
@@ -78,7 +81,9 @@ export default function AddWorkOrder({ navigation }) {
       };
 
       axios
-        .post(`http://${API_URL}/work-orders`, formData)
+        .post(`http://${API_URL}/work-orders`, formData, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
         .then((res) => {
           Alert.alert("Success", "New Work Order Added");
           console.log(res);

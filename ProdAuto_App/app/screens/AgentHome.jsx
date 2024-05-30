@@ -23,7 +23,7 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 
 const AgentHome = () => {
   const navigation = useNavigation();
-  const { logout, user } = useAuthStore();
+  const { logout, user, token } = useAuthStore();
   const dispatch = useDispatch();
   const workOrders = useSelector((state) => state.workOrders.workOrders);
   const [launchedOrders, setLaunchedOrders] = useState([]);
@@ -37,7 +37,7 @@ const AgentHome = () => {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
-      dispatch(fetchWorkOrders());
+      dispatch(fetchWorkOrders(token));
     });
     return unsubscribe;
   }, [navigation, dispatch]);

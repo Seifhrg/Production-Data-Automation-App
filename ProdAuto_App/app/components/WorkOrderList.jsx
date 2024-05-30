@@ -10,15 +10,17 @@ import {
 } from "../store/Actions/WorkOrdersActions"; // import the new action
 
 import { statusMap } from "../config/StatusOptions";
+import { useAuthStore } from "../providers/AuthProvider";
 
 const WorkOrderList = ({ navigation, route }) => {
+  const { token } = useAuthStore();
   const dispatch = useDispatch();
   const workOrders = useSelector((state) => state.workOrders.workOrders);
   const status = route.params.status;
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
-      dispatch(fetchWorkOrders());
+      dispatch(fetchWorkOrders(token));
     });
 
     return unsubscribe;

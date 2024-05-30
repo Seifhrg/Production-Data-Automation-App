@@ -12,8 +12,10 @@ import axios from "axios";
 import styles from "../Styles/ProfileUpdateStyles";
 import { API_URL } from "@env";
 import FormAdmin from "../../components/FormAdmin";
+import { useAuthStore } from "../../providers/AuthProvider";
 
 export default function ProfileUpdate({ route, navigation }) {
+  const { token } = useAuthStore();
   const { user } = route.params;
   const [userData, setUserData] = useState({
     firstName: user.firstName,
@@ -49,7 +51,9 @@ export default function ProfileUpdate({ route, navigation }) {
     if (validateInput()) {
       setLoading(true);
       axios
-        .patch(`http://${API_URL}/users/${user.id}`, userData)
+        .patch(`http://${API_URL}/users/${user.id}`, userData, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
         .then((res) => {
           console.log(res);
           Alert.alert(

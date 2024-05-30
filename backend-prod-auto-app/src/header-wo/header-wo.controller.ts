@@ -8,11 +8,16 @@ import {
   Delete,
   HttpException,
   HttpStatus,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { HeaderWoService } from './header-wo.service';
 import { Prisma } from '@prisma/client';
-
+import { JwtAuthGuard } from 'src/authentication/auth.guard';
+import { TransactionLoggingInterceptor } from 'src/log/log.interceptor';
+@UseGuards(JwtAuthGuard)
 @Controller('header-wo')
+@UseInterceptors(TransactionLoggingInterceptor)
 export class HeaderWoController {
   constructor(private readonly headerWoService: HeaderWoService) {}
 

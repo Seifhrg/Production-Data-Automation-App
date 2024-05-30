@@ -7,8 +7,10 @@ import { API_URL } from "@env";
 import WorkOrderForm from "../../components/WorkOrderForm";
 import { statusOptions } from "../../config/StatusOptions";
 import { useSelector } from "react-redux"; // import useSelector
+import { useAuthStore } from "../../providers/AuthProvider";
 
 const WorkOrderUpdate = ({ navigation }) => {
+  const { token } = useAuthStore();
   const workOrder = useSelector((state) => state.workOrders.selectedWorkOrder); // retrieve the selected workOrder from the store
   console.log("from redux", workOrder);
   if (!workOrder) {
@@ -84,7 +86,10 @@ const WorkOrderUpdate = ({ navigation }) => {
       try {
         const response = await axios.patch(
           `http://${API_URL}/work-orders/${DOCO}`,
-          payload
+          payload,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
         );
         Alert.alert("Success", "Work Order Updated Successfully");
         console.log(response);

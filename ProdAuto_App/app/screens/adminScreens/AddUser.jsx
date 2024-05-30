@@ -12,8 +12,10 @@ import axios from "axios";
 import styles from "../Styles/ProfileUpdateStyles";
 import { API_URL } from "@env";
 import FormAdmin from "../../components/FormAdmin";
+import { useAuthStore } from "../../providers/AuthProvider";
 
 export default function AddUser({ navigation, route }) {
+  const { token } = useAuthStore();
   const [userData, setUserData] = useState({
     firstName: "",
     lastName: "",
@@ -48,7 +50,9 @@ export default function AddUser({ navigation, route }) {
     if (validateInput()) {
       setLoading(true);
       axios
-        .post(`http://${API_URL}/users`, userData)
+        .post(`http://${API_URL}/users`, userData, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
         .then((res) => {
           console.log(res);
           Alert.alert("Profile Added", "Profile have been successfully added!");

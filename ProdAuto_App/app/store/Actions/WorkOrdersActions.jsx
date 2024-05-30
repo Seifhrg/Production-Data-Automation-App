@@ -20,23 +20,23 @@ export const fetchWorkOrdersFailure = (error) => ({
   type: FETCH_WORK_ORDERS_FAILURE,
   payload: error,
 });
-////////////////////////////////////////////////////
-export const selectWorkOrder = (workOrder) => {
-  return {
-    type: "SELECT_WORK_ORDER",
-    payload: workOrder,
-  };
-};
-////////////////////////////////////////////////////
 
-export const fetchWorkOrders = () => async (dispatch) => {
+export const selectWorkOrder = (workOrder) => ({
+  type: "SELECT_WORK_ORDER",
+  payload: workOrder,
+});
+
+//token passed from the agent screen getted from the useAuthStore function
+export const fetchWorkOrders = (token) => async (dispatch) => {
   dispatch(fetchWorkOrdersRequest());
+  console.log(token);
 
   try {
-    const response = await axios.get(`http://${API_URL}/work-orders`);
+    const response = await axios.get(`http://${API_URL}/work-orders`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     const workOrders = response.data;
     dispatch(fetchWorkOrdersSuccess(workOrders));
-    console.log("triggred");
   } catch (error) {
     console.error("Error fetching work orders:", error);
     dispatch(fetchWorkOrdersFailure(error.message));

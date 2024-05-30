@@ -1,7 +1,7 @@
-import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './users/users.module';
-import { AuthModule } from './authentication/auth.module';
+
 import { WorkOrdersModule } from './work-orders/work-orders.module';
 import { WorkOrderRoutingModule } from './work-order-routing/work-order-routing.module';
 import { WorkOrderPartsListModule } from './work-order-parts-list/work-order-parts-list.module';
@@ -9,7 +9,9 @@ import { TransactionHistoryModule } from './transaction-history/transaction-hist
 import { ItemLocationModule } from './item-location/item-location.module';
 import { HeaderWoModule } from './header-wo/header-wo.module';
 import { LogModule } from './log/log.module';
-import { HttpLoggingMiddleware } from './log/log.middleware';
+
+import { AuthModule } from './authentication/auth.module';
+import { ConditionalLoggingMiddleware } from './log/log.middleware';
 
 @Module({
   imports: [
@@ -28,9 +30,10 @@ import { HttpLoggingMiddleware } from './log/log.middleware';
   providers: [],
 })
 export class AppModule {
+  //middleware is added to skip specific routes to be added to log to optimize log size
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(HttpLoggingMiddleware)
+      .apply(ConditionalLoggingMiddleware)
       .forRoutes({ path: '*', method: RequestMethod.ALL });
   }
 }

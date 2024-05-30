@@ -9,19 +9,22 @@ import {
   Patch,
   Post,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Prisma, Users } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { AuthUser } from 'src/authentication/auth-user.decorator';
 import { JwtAuthGuard } from 'src/authentication/auth.guard';
 import { UsersService } from './users.service';
+import { TransactionLoggingInterceptor } from 'src/log/log.interceptor';
 
+@UseGuards(JwtAuthGuard)
+@UseInterceptors(TransactionLoggingInterceptor)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post('userData')
-  @UseGuards(JwtAuthGuard)
   async getUserData(@AuthUser() user: Users) {
     console.log('user', user);
     return user;

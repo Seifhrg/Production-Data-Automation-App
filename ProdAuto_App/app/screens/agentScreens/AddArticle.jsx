@@ -5,8 +5,11 @@ import axios from "axios";
 import styles from "./Styles/WorkOrderStyle";
 import { API_URL } from "@env";
 import ArticleForm from "../../components/ArticlesOf/ArticleForm";
+import { useAuthStore } from "../../providers/AuthProvider";
 //need to be reviewed and fixed
+
 export default function AddArticle({ navigation, route }) {
+  const { token } = useAuthStore();
   const { numOF } = route.params;
 
   const [ArticleData, setArticleData] = useState({
@@ -84,7 +87,9 @@ export default function AddArticle({ navigation, route }) {
       };
       console.log("formData", formData);
       axios
-        .post(`http://${API_URL}/work-order-parts-list`, formData)
+        .post(`http://${API_URL}/work-order-parts-list`, formData, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
         .then((res) => {
           Alert.alert("Success", "New Work Order Parts List Added");
           console.log(res);

@@ -8,10 +8,15 @@ import {
   Delete,
   HttpException,
   HttpStatus,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ItemLocationService } from './item-location.service';
 import { Prisma } from '@prisma/client';
-
+import { JwtAuthGuard } from 'src/authentication/auth.guard';
+import { TransactionLoggingInterceptor } from 'src/log/log.interceptor';
+@UseInterceptors(TransactionLoggingInterceptor)
+@UseGuards(JwtAuthGuard)
 @Controller('item-location')
 export class ItemLocationController {
   constructor(private readonly itemLocationService: ItemLocationService) {}

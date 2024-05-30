@@ -6,8 +6,10 @@ import Icon from "react-native-vector-icons/Ionicons";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { API_URL } from "@env";
+import { useAuthStore } from "../../providers/AuthProvider";
 
 const ListArticles = ({ navigation }) => {
+  const { token } = useAuthStore();
   const workOrder = useSelector((state) => state.workOrders.selectedWorkOrder); // retrieve the selected workOrder from the store
   console.log("from redux", workOrder);
   if (!workOrder) {
@@ -22,7 +24,9 @@ const ListArticles = ({ navigation }) => {
 
   const getAllArticleRelatedData = async () => {
     try {
-      const res = await axios.get(`http://${API_URL}/work-order-parts-list`);
+      const res = await axios.get(`http://${API_URL}/work-order-parts-list`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       const filteredData = res.data.filter(
         (data) => data.numOF === workOrder.DOCO

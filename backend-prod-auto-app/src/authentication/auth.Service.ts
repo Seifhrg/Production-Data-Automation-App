@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { DatabaseService } from 'src/database/database.service';
-
 import { LoginDto } from './dto/login_user.dto';
 import * as bcrypt from 'bcrypt';
 
@@ -18,21 +17,22 @@ export class AuthService {
     const user = await this.databaseService.users.findUnique({
       where: { email },
     });
-    console.log(user);
-    console.log(this.jwtService.sign({ email }));
+
     if (!user) {
-      throw new NotFoundException('user not found');
+      throw new NotFoundException('User not found');
     }
 
-    console.log(password, user.password);
     const validatePassword = await bcrypt.compare(password, user.password);
-    console.log(password, user.password, validatePassword);
+
     if (!validatePassword) {
       throw new NotFoundException('Invalid password');
     }
 
+    const token = this.jwtService.sign({ email, id: user.id });
+    console.log('Generated JWT Token:', token); // Debugging line
+
     return {
-      token: this.jwtService.sign({ email }),
+      token,
       user,
     };
   }

@@ -9,6 +9,7 @@ import axios from "axios";
 import Home from "./Home";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from '@env'
+const { token } = useAuthStore();
 
 export default function Login() {
     const [email, setEmail] = useState('')

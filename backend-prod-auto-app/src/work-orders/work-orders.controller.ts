@@ -8,10 +8,15 @@ import {
   Delete,
   HttpException,
   HttpStatus,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { WorkOrdersService } from './work-orders.service';
 import { Prisma } from '@prisma/client';
-
+import { JwtAuthGuard } from 'src/authentication/auth.guard';
+import { TransactionLoggingInterceptor } from 'src/log/log.interceptor';
+@UseInterceptors(TransactionLoggingInterceptor)
+@UseGuards(JwtAuthGuard)
 @Controller('work-orders')
 export class WorkOrdersController {
   constructor(private readonly workOrdersService: WorkOrdersService) {}
