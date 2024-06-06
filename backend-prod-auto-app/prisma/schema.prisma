@@ -69,6 +69,8 @@ model WorkOrderRouting {
   @@id([numOF, sequenceNumberOperations, businessUnit, typeOperationCode])
 }
 
+//f3003  gamme standard 
+
 //ALL ABOVE IS DONE !!
 
 //F3111 nomenclature            remember that the document type is the same in the F4111 and F4801
@@ -99,8 +101,8 @@ model TransationHistory {
   codeArticle             String             @unique
   orderAndTransactionDate DateTime
   recordCreationDate      DateTime           @default(now())
-  postedCode              String
-  documentType            String
+  //postedCode              String    //sert a rien 
+  documentType            String //IC Produit fini    //WO Input  from of articles  noemnclature 
   ItemLocation            ItemLocation?
   WorkOrderPartsList      WorkOrderPartsList @relation(fields: [codeArticle], references: [LITM])
   workOrder               WorkOrder          @relation(fields: [numOF], references: [DOCO])
@@ -113,7 +115,7 @@ model ItemLocation {
   lotStatusCode     String
   quantityOnHand    Int
   quantityReserved  Int
-  quantityAvailable Int
+  quantityAvailable Int //QAVAL
 
   @@unique([codeArticle])
 }

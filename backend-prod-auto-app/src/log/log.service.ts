@@ -35,4 +35,7 @@ export class LoggingService {
       },
     });
   }
+  async deleteAllLogs() {
+    return this.databaseService.log.deleteMany({});
+  }
 }

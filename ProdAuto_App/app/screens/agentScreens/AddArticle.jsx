@@ -6,7 +6,6 @@ import styles from "./Styles/WorkOrderStyle";
 import { API_URL } from "@env";
 import ArticleForm from "../../components/ArticlesOf/ArticleForm";
 import { useAuthStore } from "../../providers/AuthProvider";
-//need to be reviewed and fixed
 
 export default function AddArticle({ navigation, route }) {
   const { token } = useAuthStore();
@@ -37,75 +36,93 @@ export default function AddArticle({ navigation, route }) {
       (!ArticleData.quantityOrdered && isNaN(ArticleData.quantityOrdered)) ||
       ArticleData.quantityOrdered < 0
     ) {
-      newErrors.quantityOrdered = "quantityOrdered  is required";
+      newErrors.quantityOrdered = "Quantity ordered is required";
     }
 
     if (
       isNaN(ArticleData.quantityCanceled) ||
       ArticleData.quantityCanceled < 0
     ) {
-      newErrors.quantityCanceled = " must be a  number";
+      newErrors.quantityCanceled = "Must be a number";
     }
     if (isNaN(ArticleData.issuedQuantity) || ArticleData.issuedQuantity < 0) {
-      newErrors.issuedQuantity = " must be a  number";
+      newErrors.issuedQuantity = "Must be a number";
     }
     if (
       isNaN(ArticleData.unaccountedDirectLaborAmount) ||
       ArticleData.unaccountedDirectLaborAmount < 0
     ) {
-      newErrors.unaccountedDirectLaborAmount = " must be a  number";
+      newErrors.unaccountedDirectLaborAmount = "Must be a number";
     }
     if (
       isNaN(ArticleData.unaccountedDirectLaborHours) ||
       ArticleData.unaccountedDirectLaborHours < 0
     ) {
-      newErrors.unaccountedDirectLaborHours = " must be a  number";
+      newErrors.unaccountedDirectLaborHours = "Must be a number";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (validateInput()) {
       setLoading(true);
 
       // Prepare data for submission by converting relevant fields to integers
       const formData = {
         ...ArticleData,
-        quantityOrdered: parseInt(ArticleData.quantityOrdered, 10), // Convert to integer
-        issuedQuantity: parseInt(ArticleData.issuedQuantity, 10), // Convert to integer
+        quantityOrdered: parseInt(ArticleData.quantityOrdered, 10),
+        issuedQuantity: parseInt(ArticleData.issuedQuantity, 10),
         unaccountedDirectLaborHours: parseInt(
           ArticleData.unaccountedDirectLaborHours,
           10
-        ), // Convert to integer
+        ),
         unaccountedDirectLaborAmount: parseInt(
           ArticleData.unaccountedDirectLaborAmount,
           10
-        ), // Convert to integer
-        quantityCanceled: parseInt(ArticleData.quantityCanceled, 10), // Convert to integer
+        ),
+        quantityCanceled: parseInt(ArticleData.quantityCanceled, 10),
       };
-      console.log("formData", formData);
-      axios
-        .post(`http://${API_URL}/work-order-parts-list`, formData, {
+
+      try {
+        // First API call to add work order parts list
+        await axios.post(`http://${API_URL}/work-order-parts-list`, formData, {
           headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((res) => {
-          Alert.alert("Success", "New Work Order Parts List Added");
-          console.log(res);
-          if (route.params.refresh) {
-            route.params.refresh();
+        });
+
+        // Second API call to add transaction history
+        const transactionData = {
+          numOF: formData.numOF,
+
+          codeArticle: formData.LITM,
+          orderAndTransactionDate: new Date().toISOString(),
+          recordCreationDate: new Date().toISOString(),
+          documentType: "WO",
+        };
+
+        await axios.post(
+          `http://${API_URL}/transaction-history`,
+          transactionData,
+          {
+            headers: { Authorization: `Bearer ${token}` },
           }
-          navigation.goBack();
-        })
-        .catch((error) => {
-          Alert.alert(
-            "Error",
-            "Failed to add the work order parts list. Please try again."
-          );
-          console.error("Submission error:", error);
-        })
-        .finally(() => setLoading(false));
+        );
+
+        Alert.alert("Success");
+        if (route.params.refresh) {
+          route.params.refresh();
+        }
+        navigation.goBack();
+      } catch (error) {
+        Alert.alert(
+          "Error",
+          "Failed to add the work order parts list and transaction history. Please try again."
+        );
+        console.error("Submission error:", error);
+      } finally {
+        setLoading(false);
+      }
     } else {
       let errorMessages = Object.values(errors).join("\n");
       Alert.alert("Validation Error", errorMessages);

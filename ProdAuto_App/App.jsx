@@ -1,13 +1,8 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-
 import { NavigationContainer } from "@react-navigation/native";
 import Login from "./app/screens/Login";
 import AdminScreen from "./app/screens/AdminScreen";
-
-import { useEffect } from "react";
-import Messages from "./app/screens/Messages";
 import AgentHome from "./app/screens/AgentHome";
-import ResponsableStockHome from "./app/screens/ResponsableStockHome";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { AuthProvider, useAuthStore } from "./app/providers/AuthProvider";
 import ProfileUpdate from "./app/screens/adminScreens/ProfileUpdate";
@@ -21,6 +16,11 @@ import Store from "./app/store/Store";
 import ListArticles from "./app/components/ArticlesOf/ListArticles";
 import AddArticle from "./app/screens/agentScreens/AddArticle";
 import UpdateArticle from "./app/screens/agentScreens/UpdateArticle";
+import Logs from "./app/screens/adminScreens/Logs";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import TransationHistoryList from "./app/screens/ResponsableStockScreens.jsx/TransationHistoryList";
+import InventoryList from "./app/screens/ResponsableStockScreens.jsx/InventoryList";
+import WorkOrderStatistique from "./app/screens/agentScreens/workOrdersStatistiques";
 
 const Tab = createBottomTabNavigator();
 
@@ -30,41 +30,85 @@ function HomeAdmin() {
       <Tab.Screen
         name="Home"
         component={AdminScreen}
-        options={{ headerShown: false }}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="home" color={color} size={30} />
+          ),
+        }}
       />
       <Tab.Screen
-        name="Messages"
-        component={Messages}
-        options={{ headerShown: false }}
+        name="Logs"
+        component={Logs}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="list" color={color} size={30} />
+          ),
+        }}
       />
     </Tab.Navigator>
   );
 }
-/* function WorkOrderDetails() {
+
+function HomeInventoryManager() {
   return (
     <Tab.Navigator>
       <Tab.Screen
-        name="WorkOrderUpdate"
-        component={WorkOrderUpdate}
-        options={{ headerShown: false }}
+        name="InventoryList"
+        component={InventoryList}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="inventory" color={color} size={30} />
+          ),
+        }}
       />
       <Tab.Screen
-        name="ListArticles"
-        component={ListArticles}
-        options={{ headerShown: false }}
+        name="TransationHistoryList"
+        component={TransationHistoryList}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="history" color={color} size={30} />
+          ),
+        }}
       />
     </Tab.Navigator>
   );
-} */
+}
+
+function AgentHomeTabs() {
+  return (
+    <Tab.Navigator>
+      <Tab.Screen
+        name="Home"
+        component={AgentHome}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="home" color={color} size={30} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="WorkOrderStatistique"
+        component={WorkOrderStatistique}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="bar-chart" color={color} size={30} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
 
 export const Navigation = () => {
   const Stack = createNativeStackNavigator();
-
   const { isAuthenticated, user } = useAuthStore();
 
-  useEffect(() => {
-    console.log({ isAuthenticated });
-  });
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Login">
@@ -76,7 +120,7 @@ export const Navigation = () => {
                 component={GetStarted}
                 options={{ headerShown: false }}
                 initialParams={{ screen: "HomeAdmin" }}
-              ></Stack.Screen>
+              />
               <Stack.Screen
                 name="HomeAdmin"
                 component={HomeAdmin}
@@ -100,10 +144,10 @@ export const Navigation = () => {
                 component={GetStarted}
                 options={{ headerShown: false }}
                 initialParams={{ screen: "AgentHome" }}
-              ></Stack.Screen>
+              />
               <Stack.Screen
                 name="AgentHome"
-                component={AgentHome}
+                component={AgentHomeTabs}
                 options={{ headerShown: false }}
               />
               <Stack.Screen
@@ -145,11 +189,11 @@ export const Navigation = () => {
                 name="GetStarted"
                 component={GetStarted}
                 options={{ headerShown: false }}
-                initialParams={{ screen: "ResponsableStockHome" }}
-              ></Stack.Screen>
+                initialParams={{ screen: "HomeInventoryManager" }}
+              />
               <Stack.Screen
-                name="ResponsableStockHome"
-                component={ResponsableStockHome}
+                name="HomeInventoryManager"
+                component={HomeInventoryManager}
                 options={{ headerShown: false }}
               />
             </Stack.Group>

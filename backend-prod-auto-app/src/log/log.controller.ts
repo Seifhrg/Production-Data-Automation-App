@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Delete } from '@nestjs/common';
 import { LoggingService } from './log.service';
 
 import { JwtAuthGuard } from 'src/authentication/auth.guard';
@@ -24,5 +24,9 @@ export class LogController {
   @Get()
   async findAll() {
     return this.loggingService.findAllLogs();
+  }
+  @Delete()
+  async deleteAll() {
+    return this.loggingService.deleteAllLogs();
   }
 }

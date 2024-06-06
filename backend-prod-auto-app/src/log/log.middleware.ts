@@ -15,7 +15,7 @@ export class ConditionalLoggingMiddleware implements NestMiddleware {
     const { method, originalUrl, user } = req;
 
     // Skip logging for login route and other excluded routes
-    const excludedPaths = ['/auth/login', '/logs'];
+    const excludedPaths = ['/auth/login', '/logs', '/transaction-history'];
     console.log('Request URL:', originalUrl); // Debugging log
     console.log('Excluded Paths:', excludedPaths); // Debugging log
 

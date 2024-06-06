@@ -9,13 +9,11 @@ import {
   HttpException,
   HttpStatus,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { TransactionHistoryService } from './transaction-history.service';
 import { Prisma } from '@prisma/client';
 import { JwtAuthGuard } from 'src/authentication/auth.guard';
-import { TransactionLoggingInterceptor } from 'src/log/log.interceptor';
-@UseInterceptors(TransactionLoggingInterceptor)
+
 @UseGuards(JwtAuthGuard)
 @Controller('transaction-history')
 export class TransactionHistoryController {
