@@ -16,4 +16,5 @@ export const statusMap = {
   50: "Work Order Completed",
   91: "Accounting Completed",
   99: "Work Order Closed",
+  98: "Work Order Cancelled",
 };

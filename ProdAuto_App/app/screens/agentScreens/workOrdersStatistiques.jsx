@@ -1,168 +1,179 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import {
+  SafeAreaView,
   View,
   Text,
-  ScrollView,
   StyleSheet,
   Dimensions,
-  ActivityIndicator,
+  ScrollView,
 } from "react-native";
-import { LineChart, BarChart } from "react-native-chart-kit";
-import { useSelector } from "react-redux";
-
-const screenWidth = Dimensions.get("window").width;
-
+import { PieChart } from "react-native-chart-kit";
+import { statusMap } from "../../config/StatusOptions";
+import Navbar from "../../components/NavBar";
+import { useAuthStore } from "../../providers/AuthProvider";
+import { useNavigation } from "@react-navigation/native";
 const WorkOrderStatistique = () => {
   const workOrders = useSelector((state) => state.workOrders.workOrders);
+  const { logout, user } = useAuthStore();
+  const navigation = useNavigation();
 
-  if (!workOrders || workOrders.length === 0) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007BFF" />
-        <Text>No work orders available.</Text>
-      </View>
-    );
+  const totalWorkOrders = workOrders.length;
+
+  const statusCounts = workOrders.reduce((acc, order) => {
+    acc[order.statusCode] = (acc[order.statusCode] || 0) + 1;
+    return acc;
+  }, {});
+
+  const chartData = Object.keys(statusCounts).map((key) => ({
+    name: statusMap[key] || key,
+    count: statusCounts[key],
+    color: getColor(key),
+    legendFontColor: "#333",
+    legendFontSize: 15,
+    percent: ((statusCounts[key] / totalWorkOrders) * 100).toFixed(1) + "%",
+  }));
+
+  function getColor(statusCode) {
+    const colors = {
+      10: "#FF6384",
+      30: "#36A2EB",
+      45: "#FFCE56",
+      50: "#4BC0C0",
+      91: "#9966FF",
+      99: "#FF9F40",
+      98: "#FF63F4",
+    };
+    return colors[statusCode] || "#CCCCCC";
   }
 
-  const workOrderQuantityData = {
-    labels: workOrders.map((order) => `WO ${order.DOCO}`),
-    datasets: [
-      {
-        data: workOrders.map((order) => order.quantityOrdered),
-        color: (opacity = 1) => `rgba(0, 0, 255, ${opacity})`,
-        label: "Ordered",
-      },
-      {
-        data: workOrders.map((order) => order.quantityShipped),
-        color: (opacity = 1) => `rgba(0, 255, 0, ${opacity})`,
-        label: "Shipped",
-      },
-      {
-        data: workOrders.map((order) => order.quantityCanceled),
-        color: (opacity = 1) => `rgba(255, 0, 0, ${opacity})`,
-        label: "Canceled",
-      },
-    ],
-  };
-
-  const workOrderCompletionTimeData = {
-    labels: workOrders.map((order) => `WO ${order.DOCO}`),
-    datasets: [
-      {
-        data: workOrders.map((order) => {
-          const start = new Date(order.startDate);
-          const end = new Date(order.completionDate);
-          return (end - start) / (1000 * 60 * 60 * 24); // Days difference
-        }),
-        color: (opacity = 1) => `rgba(0, 0, 255, ${opacity})`,
-        label: "Completion Time (Days)",
-      },
-    ],
-  };
-
-  const workOrderTimelineData = {
-    labels: workOrders.map((order) => `WO ${order.DOCO}`),
-    datasets: [
-      {
-        data: workOrders.map((order) => new Date(order.startDate).getTime()),
-        color: (opacity = 1) => `rgba(0, 0, 255, ${opacity})`,
-        label: "Start Date",
-      },
-      {
-        data: workOrders.map((order) =>
-          new Date(order.completionDate).getTime()
-        ),
-        color: (opacity = 1) => `rgba(0, 255, 0, ${opacity})`,
-        label: "Completion Date",
-      },
-    ],
-  };
-
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>Work Order Statistics</Text>
-
-      <Text style={styles.chartTitle}>Work Order Quantities</Text>
-      <BarChart
-        data={workOrderQuantityData}
-        width={screenWidth - 32}
-        height={220}
-        chartConfig={chartConfig}
-        style={styles.chart}
-        yAxisSuffix=" units"
-        fromZero
+    <SafeAreaView style={styles.container}>
+      <Navbar
+        user={user}
+        onLogout={logout}
+        onBack={() => navigation.goBack()}
+        title="Statistics"
       />
-
-      <Text style={styles.chartTitle}>Work Order Completion Time</Text>
-      <LineChart
-        data={workOrderCompletionTimeData}
-        width={screenWidth - 32}
-        height={220}
-        chartConfig={chartConfig}
-        style={styles.chart}
-        yAxisSuffix=" days"
-        fromZero
-      />
-
-      <Text style={styles.chartTitle}>Work Order Timeline</Text>
-      <LineChart
-        data={workOrderTimelineData}
-        width={screenWidth - 32}
-        height={220}
-        chartConfig={chartConfig}
-        style={styles.chart}
-        yAxisSuffix=" ms"
-        fromZero
-      />
-    </ScrollView>
+      <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+        <Text style={styles.header}>Work Order Status Breakdown</Text>
+        <View style={styles.chartContainer}>
+          <PieChart
+            data={chartData}
+            width={Dimensions.get("window").width - 32}
+            height={320}
+            chartConfig={chartConfig}
+            accessor="count"
+            backgroundColor="transparent"
+            paddingLeft="0"
+            center={[Dimensions.get("window").width / 4, 0]}
+            absolute
+            hasLegend={false}
+          />
+        </View>
+        <View style={styles.legendContainer}>
+          {chartData.map((item) => (
+            <View key={item.name} style={styles.legendItem}>
+              <View
+                style={[styles.legendColor, { backgroundColor: item.color }]}
+              />
+              <Text style={styles.legendText}>{item.name}</Text>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const chartConfig = {
-  backgroundColor: "#e26a00",
-  backgroundGradientFrom: "#fb8c00",
-  backgroundGradientTo: "#ffa726",
-  decimalPlaces: 2,
-  color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-  labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-  style: {
-    borderRadius: 16,
+  backgroundGradientFrom: "#ffffff",
+  backgroundGradientFromOpacity: 0,
+  backgroundGradientTo: "#ffffff",
+  backgroundGradientToOpacity: 0,
+  color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+  strokeWidth: 2,
+  barPercentage: 0.5,
+  useShadowColorFromDataset: false,
+  decimalPlaces: 0,
+  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+  propsForLabels: {
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+  propsForBackgroundLines: {
+    strokeDasharray: "", // solid background lines with no dashes
   },
   propsForDots: {
     r: "6",
     strokeWidth: "2",
     stroke: "#ffa726",
   },
+  propsForLabels: {
+    fontSize: 14,
+    fontWeight: "bold",
+    fill: "#333",
+  },
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f4f7fa",
-    padding: 16,
+    backgroundColor: "#f8f8f8",
   },
-  loadingContainer: {
-    flex: 1,
+  scrollViewContainer: {
+    flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
+    padding: 16,
   },
   header: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
     color: "#333",
-    marginBottom: 16,
-    textAlign: "center",
+    borderBottomWidth: 2,
+    borderBottomColor: "#eee",
+    paddingBottom: 10,
   },
-  chartTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#007BFF",
-    marginBottom: 8,
-    textAlign: "center",
+  chartContainer: {
+    alignItems: "center",
+    marginBottom: 20,
+    backgroundColor: "#fff",
+    borderRadius: 15,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 5,
+    width: Dimensions.get("window").width - 32, // Center the chart container
   },
-  chart: {
-    marginVertical: 8,
-    borderRadius: 16,
+  legendContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+    marginTop: 20,
+  },
+  legendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 15,
+    marginBottom: 15,
+  },
+  legendColor: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    marginRight: 10,
+  },
+  legendText: {
+    fontSize: 16,
+    color: "#333",
+    fontWeight: "600",
+    textTransform: "capitalize",
   },
 });
 
