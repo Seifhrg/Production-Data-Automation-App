@@ -12,7 +12,9 @@ import axios from "axios";
 import { API_URL } from "@env";
 import { useAuthStore } from "../../providers/AuthProvider";
 import NavBar from "../../components/NavBar";
-const TransactionHistoryList = () => {
+import Icon from "react-native-vector-icons/Ionicons";
+
+const TransactionHistoryList = ({ navigation }) => {
   const { logout, user, token } = useAuthStore();
 
   const [data, setData] = useState([]);
@@ -41,14 +43,26 @@ const TransactionHistoryList = () => {
   const renderItem = ({ item }) => (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
-        <Text style={styles.title}>Transaction ID: {item.UKID}</Text>
+        <Text style={styles.title}>{item.transactionExplanation}</Text>
         <Text style={styles.date}>
+          <Icon name="calendar-outline" size={16} color="#888" />{" "}
           {new Date(item.orderAndTransactionDate).toLocaleDateString()}
         </Text>
       </View>
-      <Text style={styles.text}>Order Number: {item.numOF}</Text>
-      <Text style={styles.text}>Article Code: {item.codeArticle}</Text>
-      <Text style={styles.text}>Document Type: {item.documentType}</Text>
+      <View style={styles.cardContent}>
+        <View style={styles.cardRow}>
+          <Icon name="document-text-outline" size={20} color="#007BFF" />
+          <Text style={styles.text}>Order Number: {item.numOF}</Text>
+        </View>
+        <View style={styles.cardRow}>
+          <Icon name="pricetag-outline" size={20} color="#007BFF" />
+          <Text style={styles.text}>Article Code: {item.codeArticle}</Text>
+        </View>
+        <View style={styles.cardRow}>
+          <Icon name="document-outline" size={20} color="#007BFF" />
+          <Text style={styles.text}>Document Type: {item.documentType}</Text>
+        </View>
+      </View>
     </View>
   );
 
@@ -81,14 +95,7 @@ const TransactionHistoryList = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f4f7fa",
-    paddingTop: Platform.OS === "ios" ? 60 : 0,
-  },
-  header: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 16,
+    backgroundColor: "#f0f2f5",
   },
   loadingContainer: {
     flex: 1,
@@ -96,37 +103,54 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   listContainer: {
-    paddingTop: 18,
+    paddingHorizontal: 16,
+    paddingTop: 16,
   },
   card: {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 8,
+    backgroundColor: "#ffffff",
+    padding: 20,
+    borderRadius: 12,
     marginBottom: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: "#e3e3e3",
   },
   cardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 8,
+    alignItems: "center",
+    marginBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e9ecef",
+    paddingBottom: 8,
   },
   title: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#007BFF",
+    color: "#0056b3",
   },
   date: {
     fontSize: 14,
-    color: "#666",
+    color: "#6c757d",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  cardContent: {
+    paddingTop: 12,
+  },
+  cardRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
   },
   text: {
     fontSize: 16,
-    color: "#333",
-    marginBottom: 4,
+    color: "#495057",
+    marginLeft: 8,
   },
 });
 

@@ -7,11 +7,13 @@ import { API_URL } from "@env";
 import WorkOrderForm from "../../components/WorkOrderForm";
 import { statusOptions } from "../../config/StatusOptions";
 import { useAuthStore } from "../../providers/AuthProvider";
+import FloatingActionMenu from "../../components/FloatingActionMenu";
 
 export default function AddWorkOrder({ navigation }) {
   const { token } = useAuthStore();
   console.log("token from useAuthStore", token);
   const [workOrderData, setWorkOrderData] = useState({
+    description: "",
     quantityOrdered: "",
     requestedDate: new Date(),
     workOrderDate: new Date(),
@@ -19,19 +21,21 @@ export default function AddWorkOrder({ navigation }) {
     quantityShipped: "0",
     quantityCanceled: "0",
     unaccountedDirectLaborHours: "0",
-    documentType: "",
+    documentType: "WO",
     statusChangeDate: new Date(),
     statusCode: "", // Initialize as empty or set a default code
     completionDate: new Date(),
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [isUpdate, setIsUpdate] = useState(false);
 
   function validateInput() {
     let newErrors = {};
-    if (!workOrderData.documentType) {
-      newErrors.documentType = "Document type is required";
+    if (!workOrderData.description) {
+      newErrors.description = "Description  is required";
     }
+
     if (!workOrderData.statusCode) {
       newErrors.statusCode = "Status code is required";
     }
@@ -87,7 +91,7 @@ export default function AddWorkOrder({ navigation }) {
         .then((res) => {
           Alert.alert("Success", "New Work Order Added");
           console.log(res);
-          navigation.goBack();
+          setIsUpdate(true);
         })
         .catch((error) => {
           Alert.alert(
@@ -135,12 +139,14 @@ export default function AddWorkOrder({ navigation }) {
           <Icon name="arrow-back" size={24} color="#007AFF" />
         </TouchableOpacity>
         <Text style={styles.navTitle}>Add Work Order</Text>
+        {isUpdate && <FloatingActionMenu navigation={navigation} />}
       </View>
       <WorkOrderForm
         workOrderData={workOrderData}
         handleInputChange={handleInputChange}
         errors={errors}
         handleSubmit={handleSubmit}
+        isUpdate={isUpdate}
       />
     </ScrollView>
   );

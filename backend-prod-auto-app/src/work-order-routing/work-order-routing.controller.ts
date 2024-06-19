@@ -1,20 +1,20 @@
 import {
   Controller,
   Get,
-  Post,
-  Body,
   Patch,
   Param,
-  Delete,
   HttpException,
   HttpStatus,
   UseGuards,
   UseInterceptors,
+  Post,
+  Body,
 } from '@nestjs/common';
 import { WorkOrderRoutingService } from './work-order-routing.service';
 import { Prisma } from '@prisma/client';
 import { JwtAuthGuard } from 'src/authentication/auth.guard';
 import { TransactionLoggingInterceptor } from 'src/log/log.interceptor';
+
 @UseInterceptors(TransactionLoggingInterceptor)
 @UseGuards(JwtAuthGuard)
 @Controller('work-order-routing')
@@ -23,30 +23,19 @@ export class WorkOrderRoutingController {
     private readonly workOrderRoutingService: WorkOrderRoutingService,
   ) {}
 
-  @Post()
-  create(
-    @Body() createWorkOrderRoutingDto: Prisma.WorkOrderRoutingCreateInput,
-  ) {
-    return this.workOrderRoutingService.create(createWorkOrderRoutingDto);
-  }
-
   @Get()
   findAll() {
     return this.workOrderRoutingService.findAll();
   }
 
-  @Get(':numOF/:sequenceNumberOperations/:businessUnit/:typeOperationCode')
+  @Get(':numOF/:sequenceNumberOperations')
   async findOne(
     @Param('numOF') numOF: number,
-    @Param('sequenceNumberOperations') sequenceNumberOperations: string,
-    @Param('businessUnit') businessUnit: string,
-    @Param('typeOperationCode') typeOperationCode: string,
+    @Param('sequenceNumberOperations') sequenceNumberOperations: number,
   ) {
     const result = await this.workOrderRoutingService.findOne({
       numOF,
       sequenceNumberOperations,
-      businessUnit,
-      typeOperationCode,
     });
     if (!result) {
       throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
@@ -54,20 +43,16 @@ export class WorkOrderRoutingController {
     return result;
   }
 
-  @Patch(':numOF/:sequenceNumberOperations/:businessUnit/:typeOperationCode')
+  @Patch(':numOF/:sequenceNumberOperations')
   async update(
     @Param('numOF') numOF: number,
-    @Param('sequenceNumberOperations') sequenceNumberOperations: string,
-    @Param('businessUnit') businessUnit: string,
-    @Param('typeOperationCode') typeOperationCode: string,
+    @Param('sequenceNumberOperations') sequenceNumberOperations: number,
     @Body() updateWorkOrderRoutingDto: Prisma.WorkOrderRoutingUpdateInput,
   ) {
     const result = await this.workOrderRoutingService.update(
       {
         numOF,
         sequenceNumberOperations,
-        businessUnit,
-        typeOperationCode,
       },
       updateWorkOrderRoutingDto,
     );
@@ -77,19 +62,16 @@ export class WorkOrderRoutingController {
     return result;
   }
 
-  @Delete(':numOF/:sequenceNumberOperations/:businessUnit/:typeOperationCode')
-  async remove(
-    @Param('numOF') numOF: number,
-    @Param('sequenceNumberOperations') sequenceNumberOperations: string,
-    @Param('businessUnit') businessUnit: string,
-    @Param('typeOperationCode') typeOperationCode: string,
+  @Post('copy-operations')
+  async copyOperationsFromGammeStandard(
+    @Body('numOF') numOF: number,
+    @Body('KITL') KITL: string,
   ) {
-    const result = await this.workOrderRoutingService.remove({
-      numOF,
-      sequenceNumberOperations,
-      businessUnit,
-      typeOperationCode,
-    });
+    const result =
+      await this.workOrderRoutingService.copyOperationsFromGammeStandard(
+        numOF,
+        KITL,
+      );
     if (!result) {
       throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
     }

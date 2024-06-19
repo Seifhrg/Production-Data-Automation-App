@@ -15,26 +15,20 @@ export class WorkOrderPartsListService {
     return this.databaseService.workOrderPartsList.findMany({});
   }
 
-  findOne(key: { LITM: string; UKID: number }) {
+  findOne(UKID: number) {
     return this.databaseService.workOrderPartsList.findUnique({
       where: {
-        LITM_UKID: {
-          LITM: key.LITM,
-          UKID: Number(key.UKID),
-        },
+        UKID,
       },
     });
   }
   async update(
-    key: { LITM: string; UKID: number },
+    UKID: number,
     updateWorkOrderPartsListDto: Prisma.WorkOrderPartsListUpdateInput,
   ) {
     const exist = await this.databaseService.workOrderPartsList.findUnique({
       where: {
-        LITM_UKID: {
-          LITM: key.LITM,
-          UKID: Number(key.UKID),
-        },
+        UKID,
       },
     });
     if (!exist) {
@@ -42,22 +36,16 @@ export class WorkOrderPartsListService {
     }
     return this.databaseService.workOrderPartsList.update({
       where: {
-        LITM_UKID: {
-          LITM: key.LITM,
-          UKID: Number(key.UKID),
-        },
+        UKID,
       },
       data: updateWorkOrderPartsListDto,
     });
   }
 
-  async remove(key: { LITM: string; UKID: number }) {
+  async remove(UKID: number) {
     const exists = await this.databaseService.workOrderPartsList.findUnique({
       where: {
-        LITM_UKID: {
-          LITM: key.LITM,
-          UKID: Number(key.UKID),
-        },
+        UKID,
       },
     });
     if (!exists) {
@@ -65,10 +53,7 @@ export class WorkOrderPartsListService {
     }
     return this.databaseService.workOrderPartsList.delete({
       where: {
-        LITM_UKID: {
-          LITM: key.LITM,
-          UKID: Number(key.UKID),
-        },
+        UKID,
       },
     });
   }

@@ -71,18 +71,18 @@ export class TransactionHistoryController {
     );
   }
 
-  @Get(':UKID')
-  async findOne(@Param('UKID') UKID: number) {
-    const workOrder = await this.transactionHistoryService.findOne(+UKID);
+  @Get(':LITM')
+  async findOne(@Param('LITM') LITM: number) {
+    const workOrder = await this.transactionHistoryService.findOne(+LITM);
     if (!workOrder) {
       throw new HttpException('transaction not found', HttpStatus.NOT_FOUND);
     }
     return this.formatTransactionHistoryDates(workOrder);
   }
 
-  @Patch(':UKID')
+  @Patch(':LITM')
   async update(
-    @Param('UKID') UKID: number,
+    @Param('LITM') LITM: number,
     @Body() updateTransactionHistoryDto: Prisma.TransationHistoryUpdateInput,
   ) {
     const data = {
@@ -107,16 +107,16 @@ export class TransactionHistoryController {
           : undefined,
     };
     const updateTransactionHistory =
-      await this.transactionHistoryService.update(+UKID, data);
+      await this.transactionHistoryService.update(+LITM, data);
     if (!updateTransactionHistory) {
       throw new HttpException('Transaction not found', HttpStatus.NOT_FOUND);
     }
     return updateTransactionHistory;
   }
 
-  @Delete(':UKID')
-  async remove(@Param('UKID') UKID: number) {
-    const result = await this.transactionHistoryService.remove(+UKID);
+  @Delete(':LITM')
+  async remove(@Param('LITM') LITM: number) {
+    const result = await this.transactionHistoryService.remove(+LITM);
     if (!result) {
       throw new HttpException('Transaction not found', HttpStatus.NOT_FOUND);
     }

@@ -13,30 +13,33 @@ export default function AddArticle({ navigation, route }) {
 
   const [ArticleData, setArticleData] = useState({
     numOF: numOF,
-    LITM: "",
+    codeArticle: "",
     quantityOrdered: "",
     issuedQuantity: "0",
     unaccountedDirectLaborHours: "0",
     unaccountedDirectLaborAmount: "0",
     quantityCanceled: "0",
-    documentType: "",
+    documentType: "WO",
+    description: "",
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
   function validateInput() {
     let newErrors = {};
-    if (!ArticleData.documentType) {
-      newErrors.documentType = "Document type is required";
+    if (!ArticleData.description) {
+      newErrors.description = "Description is required";
     }
-    if (!ArticleData.LITM) {
-      newErrors.LITM = "LITM code is required";
+    if (!ArticleData.codeArticle) {
+      newErrors.codeArticle = "Code Article is required";
+    } else if (isNaN(Number(ArticleData.codeArticle))) {
+      newErrors.codeArticle = "Code Article must be a number";
     }
-    if (
-      (!ArticleData.quantityOrdered && isNaN(ArticleData.quantityOrdered)) ||
-      ArticleData.quantityOrdered < 0
-    ) {
+    if (!ArticleData.quantityOrdered) {
       newErrors.quantityOrdered = "Quantity ordered is required";
+    }
+    if (isNaN(ArticleData.quantityOrdered) || ArticleData.quantityOrdered < 0) {
+      newErrors.quantityOrdered = "Quantity Ordered must be a positive number";
     }
 
     if (
@@ -69,10 +72,10 @@ export default function AddArticle({ navigation, route }) {
     if (validateInput()) {
       setLoading(true);
 
-      // Prepare data for submission by converting relevant fields to integers
       const formData = {
         ...ArticleData,
-        quantityOrdered: parseInt(ArticleData.quantityOrdered, 10),
+        codeArticle: parseInt(ArticleData.codeArticle, 10),
+        quantityOrdered: Number(ArticleData.quantityOrdered),
         issuedQuantity: parseInt(ArticleData.issuedQuantity, 10),
         unaccountedDirectLaborHours: parseInt(
           ArticleData.unaccountedDirectLaborHours,
@@ -85,20 +88,75 @@ export default function AddArticle({ navigation, route }) {
         quantityCanceled: parseInt(ArticleData.quantityCanceled, 10),
       };
 
-      try {
-        // First API call to add work order parts list
-        await axios.post(`http://${API_URL}/work-order-parts-list`, formData, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+      console.log(formData);
 
-        // Second API call to add transaction history
+      try {
+        // Fetch the current ItemLocation data
+        const itemLocationResponse = await axios.get(
+          `http://${API_URL}/item-location/${formData.codeArticle}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const itemLocation = itemLocationResponse.data;
+        const newQuantityAvailable =
+          itemLocation.quantityAvailable - formData.quantityOrdered;
+
+        if (newQuantityAvailable < 0) {
+          Alert.alert(
+            "Error",
+            "Not enough quantity available in stock for the requested article."
+          );
+
+          // Send email alert
+          try {
+            const emailResponse = await axios.post(
+              `http://${API_URL}/email/send-stock-alert`,
+              {
+                codeArticle: formData.codeArticle,
+                quantityOrdered: formData.quantityOrdered,
+                quantityAvailable: newQuantityAvailable,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+
+            console.log("Email response:", emailResponse.data);
+          } catch (emailError) {
+            console.error(
+              "Email alert error:",
+              emailError.response || emailError.message || emailError
+            );
+            Alert.alert("Error", "Failed to send stock alert email.");
+          }
+          setLoading(false);
+
+          return;
+        }
+
+        // First API call to add work order parts list
+        const response = await axios.post(
+          `http://${API_URL}/work-order-parts-list`,
+          formData,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const { UKID } = response.data;
+
         const transactionData = {
           numOF: formData.numOF,
-
-          codeArticle: formData.LITM,
-          orderAndTransactionDate: new Date().toISOString(),
-          recordCreationDate: new Date().toISOString(),
+          codeArticle: formData.codeArticle,
+          UKID: UKID,
+          orderAndTransactionDate: new Date(),
+          quantityAvailable: newQuantityAvailable,
           documentType: "WO",
+          transactionExplanation: "Requested Article quantity",
         };
 
         await axios.post(
@@ -109,17 +167,29 @@ export default function AddArticle({ navigation, route }) {
           }
         );
 
-        Alert.alert("Success");
+        await axios.patch(
+          `http://${API_URL}/item-location/${formData.codeArticle}`,
+          {
+            quantityAvailable: newQuantityAvailable,
+            quantityOnHand:
+              itemLocation.quantityOnHand - formData.quantityOrdered,
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        Alert.alert("Success", "Article Added Successfully");
         if (route.params.refresh) {
           route.params.refresh();
         }
         navigation.goBack();
       } catch (error) {
+        console.error("Submission error:", error);
         Alert.alert(
           "Error",
-          "Failed to add the work order parts list and transaction history. Please try again."
+          "Failed to add article. Please make sure that the article exists in the stock list OR you use it twice in this WO."
         );
-        console.error("Submission error:", error);
       } finally {
         setLoading(false);
       }

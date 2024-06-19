@@ -63,6 +63,7 @@ const ListArticles = ({ navigation }) => {
             <TouchableOpacity
               onPress={() =>
                 navigation.navigate("UpdateArticle", {
+                  numOF: workOrder.DOCO,
                   article: item,
                   refresh: getAllArticleRelatedData,
                 })
@@ -71,7 +72,7 @@ const ListArticles = ({ navigation }) => {
             >
               <CircleAvatar ukid={item.UKID} />
               <View style={styles.cardDetails}>
-                <Text style={styles.documentType}>{item.documentType}</Text>
+                <Text style={styles.documentType}>{item.description}</Text>
                 <Text style={styles.quantityOrdered}>
                   Quantity Ordered: {item.quantityOrdered}
                 </Text>

@@ -1,30 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { DatabaseService } from 'src/database/database.service';
+import { Operation } from './interfaces';
 
 @Injectable()
 export class WorkOrderRoutingService {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  create(createWorkOrderRoutingDto: Prisma.WorkOrderRoutingCreateInput) {
-    return this.databaseService.workOrderRouting.create({
-      data: createWorkOrderRoutingDto,
-    });
-  }
-
-  findOne(key: {
-    numOF: number;
-    sequenceNumberOperations: string;
-    businessUnit: string;
-    typeOperationCode: string;
-  }) {
+  async findOne(key: { numOF: number; sequenceNumberOperations: number }) {
     return this.databaseService.workOrderRouting.findUnique({
       where: {
-        numOF_sequenceNumberOperations_businessUnit_typeOperationCode: {
+        numOF_sequenceNumberOperations: {
           numOF: Number(key.numOF),
           sequenceNumberOperations: key.sequenceNumberOperations,
-          businessUnit: key.businessUnit,
-          typeOperationCode: key.typeOperationCode,
         },
       },
     });
@@ -37,19 +25,15 @@ export class WorkOrderRoutingService {
   async update(
     key: {
       numOF: number;
-      sequenceNumberOperations: string;
-      businessUnit: string;
-      typeOperationCode: string;
+      sequenceNumberOperations: number;
     },
     updateWorkOrderRoutingDto: Prisma.WorkOrderRoutingUpdateInput,
   ) {
     const exists = await this.databaseService.workOrderRouting.findUnique({
       where: {
-        numOF_sequenceNumberOperations_businessUnit_typeOperationCode: {
+        numOF_sequenceNumberOperations: {
           numOF: Number(key.numOF),
           sequenceNumberOperations: key.sequenceNumberOperations,
-          businessUnit: key.businessUnit,
-          typeOperationCode: key.typeOperationCode,
         },
       },
     });
@@ -59,46 +43,43 @@ export class WorkOrderRoutingService {
     return this.databaseService.workOrderRouting.update({
       data: updateWorkOrderRoutingDto,
       where: {
-        numOF_sequenceNumberOperations_businessUnit_typeOperationCode: {
+        numOF_sequenceNumberOperations: {
           numOF: Number(key.numOF),
           sequenceNumberOperations: key.sequenceNumberOperations,
-          businessUnit: key.businessUnit,
-          typeOperationCode: key.typeOperationCode,
         },
       },
     });
   }
 
-  async remove(key: {
-    numOF: number;
-    sequenceNumberOperations: string;
-    businessUnit: string;
-    typeOperationCode: string;
-  }) {
-    const exists = await this.databaseService.workOrderRouting.findUnique({
-      where: {
-        numOF_sequenceNumberOperations_businessUnit_typeOperationCode: {
-          numOF: Number(key.numOF),
-          sequenceNumberOperations: key.sequenceNumberOperations,
-          businessUnit: key.businessUnit,
-          typeOperationCode: key.typeOperationCode,
-        },
-      },
+  async copyOperationsFromGammeStandard(numOF: number, KITL: string) {
+    const gammeStandard = await this.databaseService.gammeStandard.findUnique({
+      where: { KITL },
     });
 
-    if (!exists) {
-      return null;
+    if (!gammeStandard) {
+      throw new Error(`No GammeStandard found with KITL: ${KITL}`);
     }
 
-    return this.databaseService.workOrderRouting.delete({
-      where: {
-        numOF_sequenceNumberOperations_businessUnit_typeOperationCode: {
-          numOF: Number(key.numOF),
-          sequenceNumberOperations: key.sequenceNumberOperations,
-          businessUnit: key.businessUnit,
-          typeOperationCode: key.typeOperationCode,
-        },
-      },
+    // Parse the operations JSON field and type it as Operation[]
+    const operations: Operation[] = JSON.parse(
+      gammeStandard.operations as string,
+    ).operations;
+
+    const workOrderRoutings = operations.map((operation: Operation) => ({
+      numOF: numOF,
+      sequenceNumberOperations: operation.sequenceNumber,
+      businessUnit: operation.businessUnit,
+      Description: operation.description,
+      runLabour: operation.runLabour,
+      runMachine: operation.runMachine,
+      setupLabor: operation.setupLabor,
+      KITL: KITL,
+    }));
+
+    await this.databaseService.workOrderRouting.createMany({
+      data: workOrderRoutings,
     });
+
+    return workOrderRoutings;
   }
 }

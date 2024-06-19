@@ -10,11 +10,13 @@ import {
   HttpStatus,
   UseGuards,
   UseInterceptors,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { WorkOrderPartsListService } from './work-order-parts-list.service';
 import { Prisma } from '@prisma/client';
 import { JwtAuthGuard } from 'src/authentication/auth.guard';
 import { TransactionLoggingInterceptor } from 'src/log/log.interceptor';
+
 @UseInterceptors(TransactionLoggingInterceptor)
 @UseGuards(JwtAuthGuard)
 @Controller('work-order-parts-list')
@@ -35,23 +37,22 @@ export class WorkOrderPartsListController {
     return this.workOrderPartsListService.findAll();
   }
 
-  @Get(':LITM/:UKID')
-  async findOne(@Param('LITM') LITM: string, @Param('UKID') UKID: number) {
-    const result = await this.workOrderPartsListService.findOne({ LITM, UKID });
+  @Get(':UKID')
+  async findOne(@Param('UKID', ParseIntPipe) UKID: number) {
+    const result = await this.workOrderPartsListService.findOne(UKID);
     if (!result) {
       throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
     }
     return result;
   }
 
-  @Patch(':LITM/:UKID')
+  @Patch(':UKID')
   async update(
-    @Param('LITM') LITM: string,
-    @Param('UKID') UKID: number,
+    @Param('UKID', ParseIntPipe) UKID: number,
     @Body() updateWorkOrderPartsListDto: Prisma.WorkOrderPartsListUpdateInput,
   ) {
     const result = await this.workOrderPartsListService.update(
-      { LITM, UKID },
+      UKID,
       updateWorkOrderPartsListDto,
     );
     if (!result) {
@@ -60,10 +61,9 @@ export class WorkOrderPartsListController {
     return result;
   }
 
-  // Adjust to use composite key
-  @Delete(':LITM/:UKID')
-  async remove(@Param('LITM') LITM: string, @Param('UKID') UKID: number) {
-    const result = await this.workOrderPartsListService.remove({ LITM, UKID });
+  @Delete(':UKID')
+  async remove(@Param('UKID', ParseIntPipe) UKID: number) {
+    const result = await this.workOrderPartsListService.remove(UKID);
     if (!result) {
       throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
     }

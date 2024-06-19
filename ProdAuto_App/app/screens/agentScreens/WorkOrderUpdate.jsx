@@ -8,7 +8,7 @@ import WorkOrderForm from "../../components/WorkOrderForm";
 import { statusOptions } from "../../config/StatusOptions";
 import { useSelector } from "react-redux"; // import useSelector
 import { useAuthStore } from "../../providers/AuthProvider";
-
+import FloatingActionMenu from "../../components/FloatingActionMenu";
 const WorkOrderUpdate = ({ navigation }) => {
   const { token } = useAuthStore();
   const workOrder = useSelector((state) => state.workOrders.selectedWorkOrder); // retrieve the selected workOrder from the store
@@ -117,14 +117,8 @@ const WorkOrderUpdate = ({ navigation }) => {
         >
           <Icon name="arrow-back" size={24} color="#007AFF" />
         </TouchableOpacity>
-        <Text style={styles.navTitle}> Work Order Details</Text>
-
-        {/*just for testing */}
-        <TouchableOpacity onPress={() => navigation.navigate("ListArticles")}>
-          <Text>Article List just For testing</Text>
-        </TouchableOpacity>
-
-        {/*just for testing */}
+        <Text style={styles.navTitle}>{workOrder.description}</Text>
+        <FloatingActionMenu navigation={navigation} />
       </View>
       <WorkOrderForm
         workOrderData={workOrderData}

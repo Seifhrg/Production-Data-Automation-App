@@ -10,6 +10,7 @@ import {
   HttpStatus,
   UseGuards,
   UseInterceptors,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ItemLocationService } from './item-location.service';
 import { Prisma } from '@prisma/client';
@@ -32,7 +33,8 @@ export class ItemLocationController {
   }
 
   @Get(':codeArticle')
-  async findOne(@Param('codeArticle') codeArticle: string) {
+  //ParseIntPipe   convert codeArticle from string to number
+  async findOne(@Param('codeArticle', ParseIntPipe) codeArticle: number) {
     const result = await this.itemLocationService.findOne(codeArticle);
     if (!result) {
       throw new HttpException('Item Not Found', HttpStatus.NOT_FOUND);
@@ -42,7 +44,7 @@ export class ItemLocationController {
 
   @Patch(':codeArticle')
   async update(
-    @Param('codeArticle') codeArticle: string,
+    @Param('codeArticle', ParseIntPipe) codeArticle: number,
     @Body() updateItemLocationDto: Prisma.ItemLocationUpdateInput,
   ) {
     const result = await this.itemLocationService.update(
@@ -56,7 +58,7 @@ export class ItemLocationController {
   }
 
   @Delete(':codeArticle')
-  async remove(@Param('codeArticle') codeArticle: string) {
+  async remove(@Param('codeArticle', ParseIntPipe) codeArticle: number) {
     const result = await this.itemLocationService.remove(codeArticle);
     if (!result) {
       throw new HttpException('Item not found', HttpStatus.NOT_FOUND);

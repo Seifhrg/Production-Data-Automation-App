@@ -10,21 +10,24 @@ import { useAuthStore } from "../../providers/AuthProvider";
 const UpdateArticle = ({ route, navigation }) => {
   const { token } = useAuthStore();
   const { article } = route.params;
-  const LITM = article.LITM;
+  const { numOF } = route.params;
+
   const UKID = article.UKID;
 
   const [ArticleData, setArticleData] = useState({
+    numOF: numOF,
+    codeArticle: article.codeArticle,
     quantityOrdered: article.quantityOrdered,
     issuedQuantity: article.issuedQuantity,
     unaccountedDirectLaborHours: article.unaccountedDirectLaborHours,
     unaccountedDirectLaborAmount: article.unaccountedDirectLaborAmount,
     quantityCanceled: article.quantityCanceled,
     documentType: article.documentType,
+    description: article.description,
   });
 
   const [errors, setErrors] = useState({});
 
-  //check The handle Input
   const handleInputChange = (field, value) => {
     setArticleData((prev) => ({ ...prev, [field]: value }));
     if (errors[field] !== null && errors[field] !== undefined) {
@@ -32,38 +35,47 @@ const UpdateArticle = ({ route, navigation }) => {
     }
   };
 
-  const validateInput = () => {
+  function validateInput() {
     let newErrors = {};
-    if (!ArticleData.documentType) {
-      newErrors.documentType = "Document type is required";
+    if (!ArticleData.description) {
+      newErrors.description = "Description is required";
+    }
+    if (!ArticleData.codeArticle) {
+      newErrors.codeArticle = "Code Article is required";
+    } else if (isNaN(Number(ArticleData.codeArticle))) {
+      newErrors.codeArticle = "Code Article must be a number";
+    }
+    if (!ArticleData.quantityOrdered) {
+      newErrors.quantityOrdered = "Quantity ordered is required";
     }
     if (isNaN(ArticleData.quantityOrdered) || ArticleData.quantityOrdered < 0) {
-      newErrors.quantityOrdered = " must be a  number";
+      newErrors.quantityOrdered = "Quantity Ordered must be a positive number";
     }
     if (
       isNaN(ArticleData.quantityCanceled) ||
       ArticleData.quantityCanceled < 0
     ) {
-      newErrors.quantityCanceled = " must be a  number";
+      newErrors.quantityCanceled = "Must be a number";
     }
     if (isNaN(ArticleData.issuedQuantity) || ArticleData.issuedQuantity < 0) {
-      newErrors.issuedQuantity = " must be a  number";
+      newErrors.issuedQuantity = "Must be a number";
     }
     if (
       isNaN(ArticleData.unaccountedDirectLaborAmount) ||
       ArticleData.unaccountedDirectLaborAmount < 0
     ) {
-      newErrors.unaccountedDirectLaborAmount = " must be a  number";
+      newErrors.unaccountedDirectLaborAmount = "Must be a number";
     }
     if (
       isNaN(ArticleData.unaccountedDirectLaborHours) ||
       ArticleData.unaccountedDirectLaborHours < 0
     ) {
-      newErrors.unaccountedDirectLaborHours = " must be a  number";
+      newErrors.unaccountedDirectLaborHours = "Must be a number";
     }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }
 
   const handleSubmit = async () => {
     if (validateInput()) {
@@ -83,32 +95,107 @@ const UpdateArticle = ({ route, navigation }) => {
       };
 
       try {
+        // Fetch the current ItemLocation data
+        const itemLocationResponse = await axios.get(
+          `http://${API_URL}/item-location/${payload.codeArticle}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const itemLocation = itemLocationResponse.data;
+        const quantityDifference =
+          payload.quantityOrdered - article.quantityOrdered;
+        const newQuantityAvailable =
+          itemLocation.quantityAvailable - quantityDifference;
+
+        if (newQuantityAvailable < 0) {
+          Alert.alert(
+            "Error",
+            "Not enough quantity available in stock for the requested article."
+          );
+          // Send email alert
+          try {
+            const emailResponse = await axios.post(
+              `http://${API_URL}/email/send-stock-alert`,
+              {
+                codeArticle: payload.codeArticle,
+                quantityOrdered: payload.quantityOrdered,
+                quantityAvailable: newQuantityAvailable,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+
+            console.log("Email response:", emailResponse.data);
+          } catch (emailError) {
+            console.error(
+              "Email alert error:",
+              emailError.response || emailError.message || emailError
+            );
+          }
+
+          return;
+        }
+
+        // Update work order parts list
         const response = await axios.patch(
-          `http://${API_URL}/work-order-parts-list/${LITM}/${UKID}`,
+          `http://${API_URL}/work-order-parts-list/${UKID}`,
           payload,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
+
+        const transactionData = {
+          numOF: payload.numOF,
+          codeArticle: payload.codeArticle,
+          UKID: UKID,
+          orderAndTransactionDate: new Date(),
+          quantityAvailable: newQuantityAvailable,
+          documentType: "WO",
+          transactionExplanation: "Update Article quantity",
+        };
+
+        // Create a new transaction
+        await axios.post(
+          `http://${API_URL}/transaction-history`,
+          transactionData,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        // Update item location
+        await axios.patch(
+          `http://${API_URL}/item-location/${payload.codeArticle}`,
+          {
+            quantityAvailable: newQuantityAvailable,
+            quantityOnHand: itemLocation.quantityOnHand - quantityDifference,
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
         Alert.alert("Success", "Article Updated Successfully");
-        console.log(response);
         if (route.params.refresh) {
           route.params.refresh();
         }
         navigation.goBack();
       } catch (error) {
         console.error("Update error:", error);
-        Alert.alert(
-          "Error",
-          "Failed to update the work order. Please try again."
-        );
+
+        Alert.alert("Error", "Failed to update the article. Please try again.");
       }
     } else {
       let errorMessages = Object.values(errors).join("\n");
       Alert.alert("Validation Error", errorMessages);
     }
   };
-
   return (
     <ScrollView style={styles.container}>
       <View style={styles.navBar}>

@@ -15,39 +15,39 @@ export class TransactionHistoryService {
     return this.databaseService.transationHistory.findMany({});
   }
 
-  findOne(UKID: number) {
+  findOne(LITM: number) {
     return this.databaseService.transationHistory.findUnique({
-      where: { UKID },
+      where: { LITM },
     });
   }
 
   async update(
-    UKID: number,
+    LITM: number,
     updatecTransactionHistoryDto: Prisma.TransationHistoryUpdateInput,
   ) {
     const existingTransctionHistory =
       await this.databaseService.transationHistory.findUnique({
-        where: { UKID },
+        where: { LITM },
       });
     if (!existingTransctionHistory) {
       return null;
     }
     return this.databaseService.transationHistory.update({
-      where: { UKID },
+      where: { LITM },
       data: updatecTransactionHistoryDto,
     });
   }
 
-  async remove(UKID: number) {
+  async remove(LITM: number) {
     const existingTransactionHistory =
       await this.databaseService.transationHistory.findUnique({
-        where: { UKID },
+        where: { LITM },
       });
     if (!existingTransactionHistory) {
       return null;
     }
     return this.databaseService.transationHistory.delete({
-      where: { UKID },
+      where: { LITM },
     });
   }
 }

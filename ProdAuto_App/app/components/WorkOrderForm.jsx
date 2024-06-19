@@ -6,6 +6,7 @@ import {
   Text,
   TextInput,
   Modal,
+  FlatList,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -17,7 +18,7 @@ const WorkOrderForm = ({
   handleInputChange,
   errors,
   handleSubmit,
-  isUpdate = false,
+  isUpdate,
 }) => {
   const [datePickerShown, setDatePickerShown] = useState({
     requestedDate: false,
@@ -35,7 +36,6 @@ const WorkOrderForm = ({
   const handleDateChange = (key, event, selectedDate) => {
     setDatePickerShown((prev) => ({ ...prev, [key]: false }));
     if (selectedDate) {
-      console.log(key, "key");
       handleInputChange(key, selectedDate);
     }
   };
@@ -44,6 +44,18 @@ const WorkOrderForm = ({
     const status = statusOptions.find((option) => option.code === code);
     return status ? status.label : "Select Status";
   };
+
+  const renderStatusOption = ({ item }) => (
+    <TouchableOpacity
+      style={styles.option}
+      onPress={() => {
+        handleInputChange("statusCode", item.code);
+        setModalVisible(false);
+      }}
+    >
+      <Text style={styles.optionText}>{item.label}</Text>
+    </TouchableOpacity>
+  );
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -99,27 +111,29 @@ const WorkOrderForm = ({
               <Modal
                 transparent={true}
                 visible={modalVisible}
+                animationType="fade"
                 onRequestClose={() => setModalVisible(false)}
               >
-                <TouchableOpacity
-                  style={styles.modalContainer}
-                  onPress={() => setModalVisible(false)}
-                >
+                <View style={styles.modalContainer}>
                   <View style={styles.modalContent}>
-                    {statusOptions.map((option, index) => (
-                      <TouchableOpacity
-                        key={index}
-                        style={styles.option}
-                        onPress={() => {
-                          handleInputChange("statusCode", option.code);
-                          setModalVisible(false);
-                        }}
-                      >
-                        <Text style={styles.optionText}>{option.label}</Text>
+                    <View style={styles.modalHeader}>
+                      <Text style={styles.modalTitle}>Select Status</Text>
+                      <TouchableOpacity onPress={() => setModalVisible(false)}>
+                        <MaterialIcons
+                          name="close"
+                          size={24}
+                          color={styles.icons.color}
+                        />
                       </TouchableOpacity>
-                    ))}
+                    </View>
+                    <FlatList
+                      data={statusOptions}
+                      renderItem={renderStatusOption}
+                      keyExtractor={(item) => item.code}
+                      contentContainerStyle={styles.flatListContent}
+                    />
                   </View>
-                </TouchableOpacity>
+                </View>
               </Modal>
             </>
           ) : (

@@ -37,6 +37,7 @@ model HeaderWO {
 //F4801 Ordre de fabrication  remember that the document type is the same in the F4111 and F3111
 model WorkOrder {
   DOCO                        Int                  @id @default(autoincrement())
+  description                 String
   quantityOrdered             Int
   startDate                   DateTime
   requestedDate               DateTime
@@ -44,7 +45,7 @@ model WorkOrder {
   quantityShipped             Int                  @default(0)
   quantityCanceled            Int                  @default(0)
   unaccountedDirectLaborHours Int                  @default(0)
-  documentType                String
+  documentType                String               @default("WO")
   statusChangeDate            DateTime
   statusCode                  String
   completionDate              DateTime
@@ -55,21 +56,26 @@ model WorkOrder {
   TransationHistory           TransationHistory[]
 }
 
+//F3003 Gamme Standard      take the right gamme with the IRKITL : Kit - 2nd Item Number "FAB001"
+model GammeStandard {
+  KITL       String @id
+  operations Json // Operations as a JSON object   
+}
+
 //F3112 gamme de fabrication
 model WorkOrderRouting {
   numOF                    Int
   workOrder                WorkOrder @relation(fields: [numOF], references: [DOCO])
-  sequenceNumberOperations String
+  sequenceNumberOperations Int
   businessUnit             String
-  typeOperationCode        String
-  runLabour                Int
-  runMachine               Int
-  setupLabor               Int
+  Description              String
+  runLabour                Int //standard
+  runMachine               Int //standard
+  setupLabor               Int //standard
+  KITL                     String
 
-  @@id([numOF, sequenceNumberOperations, businessUnit, typeOperationCode])
+  @@id([numOF, sequenceNumberOperations])
 }
-
-//f3003  gamme standard 
 
 //ALL ABOVE IS DONE !!
 
@@ -77,47 +83,51 @@ model WorkOrderRouting {
 
 model WorkOrderPartsList {
   numOF                        Int
-  workOrder                    WorkOrder          @relation(fields: [numOF], references: [DOCO])
-  LITM                         String             @unique //CPIT
-  UKID                         Int                @default(autoincrement())
+  workOrder                    WorkOrder           @relation(fields: [numOF], references: [DOCO])
+  itemLocation                 ItemLocation        @relation(fields: [codeArticle], references: [codeArticle])
+  codeArticle                  Int
+  UKID                         Int                 @id @default(autoincrement())
   quantityOrdered              Int
   issuedQuantity               Int
   unaccountedDirectLaborHours  Int
   unaccountedDirectLaborAmount Int
-  updatedDate                  DateTime           @updatedAt
-  quantityCanceled             Int                @default(0)
+  updatedDate                  DateTime            @updatedAt
+  quantityCanceled             Int                 @default(0)
   documentType                 String
-  TransationHistory            TransationHistory?
+  description                  String
+  TransationHistory            TransationHistory[]
 
-  @@id([LITM, UKID])
+  @@unique([codeArticle, numOF])
 }
 
 //remember that the document type is the same in the F4801 and F3111
 //fk ITM
 //f4111
 model TransationHistory {
+  LITM                    Int                 @id @default(autoincrement()) //id Transaction 
   numOF                   Int
-  UKID                    Int                @id @default(autoincrement())
-  codeArticle             String             @unique
+  UKID                    Int?
+  codeArticle             Int
   orderAndTransactionDate DateTime
-  recordCreationDate      DateTime           @default(now())
-  //postedCode              String    //sert a rien 
+  recordCreationDate      DateTime            @default(now())
+  quantityAvailable       Int
   documentType            String //IC Produit fini    //WO Input  from of articles  noemnclature 
-  ItemLocation            ItemLocation?
-  WorkOrderPartsList      WorkOrderPartsList @relation(fields: [codeArticle], references: [LITM])
-  workOrder               WorkOrder          @relation(fields: [numOF], references: [DOCO])
+  transactionExplanation  String
+  WorkOrderPartsList      WorkOrderPartsList? @relation(fields: [UKID], references: [UKID])
+  workOrder               WorkOrder           @relation(fields: [numOF], references: [DOCO])
+  itemLocation            ItemLocation        @relation(fields: [codeArticle], references: [codeArticle])
 }
 
 //f41021       1..1 relations between 4111 and 41021 change it in conception
 model ItemLocation {
-  codeArticle       String            @id
-  FK_CodeArticle    TransationHistory @relation(fields: [codeArticle], references: [codeArticle])
-  lotStatusCode     String
-  quantityOnHand    Int
-  quantityReserved  Int
-  quantityAvailable Int //QAVAL
+  codeArticle Int @id @default(autoincrement())
 
-  @@unique([codeArticle])
+  lotStatusCode      String
+  quantityOnHand     Int
+  quantityReserved   Int
+  quantityAvailable  Int //automatically calculated =onHand-reserved
+  WorkOrderPartsList WorkOrderPartsList[]
+  TransationHistory  TransationHistory[]
 }
 
 model Log {

@@ -22,15 +22,27 @@ const LogItem = React.memo(({ item }) => (
     <View style={styles.logItemHeader}>
       <Text style={styles.logTitle}>{item.action}</Text>
       <Text style={styles.logDate}>
+        <Icon name="access-time" size={16} color="#888" />{" "}
         {new Date(item.timestamp).toLocaleString()}
       </Text>
     </View>
-    <Text style={styles.logText}>Entity: {item.entity}</Text>
-    <Text style={styles.logText}>Entity ID: {item.entityId}</Text>
-    <Text style={styles.logText}>User ID: {item.userId}</Text>
-    <Text style={styles.logText}>Method: {item.method}</Text>
-    <Text style={styles.logText}>URL: {item.url}</Text>
-    <Text style={styles.logText}>Status Code: {item.statusCode}</Text>
+
+    <View style={styles.logDetail}>
+      <Icon name="person-outline" size={20} color="#007BFF" />
+      <Text style={styles.logText}>User ID: {item.userId}</Text>
+    </View>
+    <View style={styles.logDetail}>
+      <Icon name="http" size={20} color="#007BFF" />
+      <Text style={styles.logText}>Method: {item.method}</Text>
+    </View>
+    <View style={styles.logDetail}>
+      <Icon name="link" size={20} color="#007BFF" />
+      <Text style={styles.logText}>URL: {item.url}</Text>
+    </View>
+    <View style={styles.logDetail}>
+      <Icon name="check-circle-outline" size={20} color="#007BFF" />
+      <Text style={styles.logText}>Status Code: {item.statusCode}</Text>
+    </View>
   </View>
 ));
 
@@ -92,32 +104,40 @@ const Logs = () => {
     <SafeAreaView style={styles.container}>
       <NavBar user={user} onLogout={logout} title="Log History" />
       <View style={styles.spacing} />
-      <View style={styles.datePickerContainer}>
+      <View style={styles.filterContainer}>
         <TouchableOpacity
           onPress={() => setShowDatePicker(true)}
-          style={styles.datePickerButton}
+          style={styles.filterButton}
         >
-          <Text style={styles.datePickerButtonText}>
+          <Icon name="calendar-today" size={24} color="#fff" />
+          <Text style={styles.filterButtonText}>
             {selectedDate.toDateString()}
           </Text>
-          <Icon name="calendar-today" size={24} color="#fff" />
         </TouchableOpacity>
+        {showDatePicker && (
+          <DateTimePicker
+            value={selectedDate}
+            mode="date"
+            display="default"
+            onChange={handleDateChange}
+            style={styles.datePicker}
+          />
+        )}
+        <View style={styles.searchBarContainer}>
+          <Icon
+            name="search"
+            size={24}
+            color="#888"
+            style={styles.searchIcon}
+          />
+          <TextInput
+            style={styles.searchBar}
+            placeholder="Search by user ID or entity"
+            value={searchQuery}
+            onChangeText={handleSearch}
+          />
+        </View>
       </View>
-      {showDatePicker && (
-        <DateTimePicker
-          value={selectedDate}
-          mode="date"
-          display="default"
-          onChange={handleDateChange}
-        />
-      )}
-      <TextInput
-        style={styles.searchBar}
-        placeholder="Search by user ID or entity"
-        value={searchQuery}
-        onChangeText={handleSearch}
-      />
-      {/* FlatList is optimized with initialNumToRender, maxToRenderPerBatch, and windowSize to improve performance. */}
       <FlatList
         data={filteredLogs}
         keyExtractor={(item) => item.id.toString()}
@@ -134,82 +154,107 @@ const Logs = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f4f7fa",
-    paddingTop: Platform.OS === "ios" ? 60 : 0,
+    backgroundColor: "#f8f9fa",
   },
   spacing: {
     height: 16,
   },
-  datePickerContainer: {
+  filterContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-between",
     marginBottom: 16,
+    paddingHorizontal: 16,
   },
-  datePickerButton: {
+  filterButton: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#007BFF",
-    padding: 14,
-    borderRadius: 10,
-    marginBottom: 20,
+    padding: 10,
+    borderRadius: 8,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.5,
+    shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
   },
-  datePickerButtonText: {
-    flex: 1,
-    fontSize: 18,
+  filterButtonText: {
+    fontSize: 16,
     color: "#fff",
+    marginLeft: 8,
   },
-  searchBar: {
-    height: 45,
+  searchBarContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
     borderColor: "#007BFF",
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 8,
     paddingHorizontal: 10,
-    backgroundColor: "#fff",
-    marginBottom: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.5,
+    shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
+    marginLeft: 10,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchBar: {
+    flex: 1,
+    height: 40,
+    backgroundColor: "#fff",
+  },
+  datePicker: {
+    backgroundColor: "#ffffff",
+    borderRadius: 10,
   },
   listContainer: {
     paddingBottom: 20,
+    paddingHorizontal: 16,
   },
   logItem: {
-    backgroundColor: "#fff",
-    padding: 18,
+    backgroundColor: "#ffffff",
+    padding: 20,
     borderRadius: 10,
     marginBottom: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.5,
+    shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
   },
   logItemHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e9ecef",
+    paddingBottom: 8,
   },
   logTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
-    color: "#333",
+    color: "#007BFF",
   },
   logDate: {
-    fontSize: 16,
+    fontSize: 14,
     color: "#666",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  logDetail: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
   },
   logText: {
-    fontSize: 18,
-    color: "#333",
-    marginBottom: 6,
+    fontSize: 16,
+    color: "#495057",
+    marginLeft: 8,
   },
 });
 

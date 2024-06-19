@@ -55,12 +55,12 @@ const WorkOrderList = ({ navigation, route }) => {
             >
               <CircleAvatar doco={item.DOCO} />
               <View style={styles.cardDetails}>
-                <Text style={styles.documentType}>{item.documentType}</Text>
+                <Text style={styles.documentType}>{item.description}</Text>
                 <Text style={styles.quantityOrdered}>
                   Quantity Ordered: {item.quantityOrdered}
                 </Text>
                 <Text style={styles.statusCode}>
-                  Status: {statusMap[item.statusCode]}
+                  Quantity Shipped: {item.quantityShipped}
                 </Text>
                 <Text style={styles.requestedDate}>
                   Requested Date : {item.requestedDate}
