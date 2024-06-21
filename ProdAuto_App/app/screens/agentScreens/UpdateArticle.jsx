@@ -76,7 +76,30 @@ const UpdateArticle = ({ route, navigation }) => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
-
+  const sendEmailAlert = async (payload, newQuantityAvailable) => {
+    try {
+      const emailResponse = await axios.post(
+        `http://${API_URL}/email/send-stock-alert`,
+        {
+          codeArticle: payload.codeArticle,
+          quantityOrdered: payload.quantityOrdered,
+          quantityAvailable: newQuantityAvailable,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("Email response:", emailResponse.data);
+    } catch (emailError) {
+      console.error(
+        "Email alert error:",
+        emailError.response || emailError.message || emailError
+      );
+      Alert.alert("Error", "Failed to send stock alert email.");
+    }
+  };
   const handleSubmit = async () => {
     if (validateInput()) {
       const payload = {
@@ -112,33 +135,13 @@ const UpdateArticle = ({ route, navigation }) => {
         if (newQuantityAvailable < 0) {
           Alert.alert(
             "Error",
-            "Not enough quantity available in stock for the requested article."
+            "Not enough quantity available in stock , we will send Email to stock manager "
           );
-          // Send email alert
-          try {
-            const emailResponse = await axios.post(
-              `http://${API_URL}/email/send-stock-alert`,
-              {
-                codeArticle: payload.codeArticle,
-                quantityOrdered: payload.quantityOrdered,
-                quantityAvailable: newQuantityAvailable,
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            );
-
-            console.log("Email response:", emailResponse.data);
-          } catch (emailError) {
-            console.error(
-              "Email alert error:",
-              emailError.response || emailError.message || emailError
-            );
-          }
+          await sendEmailAlert(payload, newQuantityAvailable);
 
           return;
+        } else if (newQuantityAvailable <= 60) {
+          await sendEmailAlert(payload, newQuantityAvailable);
         }
 
         // Update work order parts list

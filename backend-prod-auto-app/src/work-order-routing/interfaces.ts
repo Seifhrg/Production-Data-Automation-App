@@ -1,7 +1,7 @@
 export interface Operation {
-  sequenceNumber: number;
+  sequenceNumberOperations: number;
   businessUnit: string;
-  description: string;
+  Description: string;
   runLabour: number;
   runMachine: number;
   setupLabor: number;

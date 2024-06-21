@@ -67,7 +67,7 @@ const FloatingActionMenu = ({ navigation }) => {
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => {
-                navigation.navigate("WorkOrderRouting");
+                navigation.navigate("RoutingList");
                 toggleMenu();
               }}
             >

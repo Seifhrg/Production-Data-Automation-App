@@ -66,13 +66,14 @@ model GammeStandard {
 model WorkOrderRouting {
   numOF                    Int
   workOrder                WorkOrder @relation(fields: [numOF], references: [DOCO])
-  sequenceNumberOperations Int
-  businessUnit             String
-  Description              String
-  runLabour                Int //standard
-  runMachine               Int //standard
-  setupLabor               Int //standard
-  KITL                     String
+  sequenceNumberOperations Int //IROPSQ
+  businessUnit             String //IRMCU
+  Description              String //IRDSC1
+
+  runLabour  Int //standard  //IRRUNL
+  runMachine Int //standard  //IRRUNM
+  setupLabor Int //standard    //IRSETL
+  KITL       String
 
   @@id([numOF, sequenceNumberOperations])
 }

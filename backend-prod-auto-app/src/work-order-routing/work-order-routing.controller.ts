@@ -62,6 +62,15 @@ export class WorkOrderRoutingController {
     return result;
   }
 
+  @Get(':numOF')
+  async findByNumOF(@Param('numOF') numOF: number) {
+    const result = await this.workOrderRoutingService.findByNumOF(numOF);
+    if (!result || result.length === 0) {
+      throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+    }
+    return result;
+  }
+
   @Post('copy-operations')
   async copyOperationsFromGammeStandard(
     @Body('numOF') numOF: number,

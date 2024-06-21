@@ -67,6 +67,30 @@ export default function AddArticle({ navigation, route }) {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
+  const sendEmailAlert = async (formData, newQuantityAvailable) => {
+    try {
+      const emailResponse = await axios.post(
+        `http://${API_URL}/email/send-stock-alert`,
+        {
+          codeArticle: formData.codeArticle,
+          quantityOrdered: formData.quantityOrdered,
+          quantityAvailable: newQuantityAvailable,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("Email response:", emailResponse.data);
+    } catch (emailError) {
+      console.error(
+        "Email alert error:",
+        emailError.response || emailError.message || emailError
+      );
+      Alert.alert("Error", "Failed to send stock alert email.");
+    }
+  };
 
   async function handleSubmit() {
     if (validateInput()) {
@@ -106,36 +130,13 @@ export default function AddArticle({ navigation, route }) {
         if (newQuantityAvailable < 0) {
           Alert.alert(
             "Error",
-            "Not enough quantity available in stock for the requested article."
+            "Not enough quantity available in stock , we will send Email to stock manager "
           );
-
-          // Send email alert
-          try {
-            const emailResponse = await axios.post(
-              `http://${API_URL}/email/send-stock-alert`,
-              {
-                codeArticle: formData.codeArticle,
-                quantityOrdered: formData.quantityOrdered,
-                quantityAvailable: newQuantityAvailable,
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            );
-
-            console.log("Email response:", emailResponse.data);
-          } catch (emailError) {
-            console.error(
-              "Email alert error:",
-              emailError.response || emailError.message || emailError
-            );
-            Alert.alert("Error", "Failed to send stock alert email.");
-          }
+          await sendEmailAlert(formData, newQuantityAvailable);
           setLoading(false);
-
           return;
+        } else if (newQuantityAvailable <= 60) {
+          await sendEmailAlert(formData, newQuantityAvailable);
         }
 
         // First API call to add work order parts list

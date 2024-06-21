@@ -21,6 +21,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import TransationHistoryList from "./app/screens/ResponsableStockScreens.jsx/TransationHistoryList";
 import InventoryList from "./app/screens/ResponsableStockScreens.jsx/InventoryList";
 import WorkOrderStatistique from "./app/screens/agentScreens/workOrdersStatistiques";
+import RoutingList from "./app/components/RoutingList";
 
 const Tab = createBottomTabNavigator();
 
@@ -165,7 +166,7 @@ export const Navigation = () => {
                 component={WorkOrderUpdate}
                 options={{ headerShown: false }}
               />
-              {/* For testing only */}
+
               <Stack.Screen
                 name="ListArticles"
                 component={ListArticles}
@@ -181,7 +182,11 @@ export const Navigation = () => {
                 component={UpdateArticle}
                 options={{ headerShown: false }}
               />
-              {/* For testing only */}
+              <Stack.Screen
+                name="RoutingList"
+                component={RoutingList}
+                options={{ headerShown: false }}
+              />
             </Stack.Group>
           ) : user.role === "Responsable_Stock" ? (
             <Stack.Group>
