@@ -9,10 +9,11 @@ import { TransactionHistoryModule } from './transaction-history/transaction-hist
 import { ItemLocationModule } from './item-location/item-location.module';
 import { HeaderWoModule } from './header-wo/header-wo.module';
 import { LogModule } from './log/log.module';
-import { EmailService } from './mailServices/email.service';
-import { EmailController } from './mailServices/email.controller';
+
 import { AuthModule } from './authentication/auth.module';
 import { ConditionalLoggingMiddleware } from './log/log.middleware';
+import { EmailModule } from './mailServices/email.module';
+import { PdfModule } from './pdfGenerator/pdf.module';
 
 @Module({
   imports: [
@@ -27,9 +28,11 @@ import { ConditionalLoggingMiddleware } from './log/log.middleware';
     ItemLocationModule,
     HeaderWoModule,
     LogModule,
+    EmailModule,
+    PdfModule,
   ],
-  controllers: [EmailController],
-  providers: [EmailService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {
   //middleware is added to skip specific routes to be added to log to optimize log size
